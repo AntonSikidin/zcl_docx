@@ -185,7 +185,9 @@ CLASS lcl_docx DEFINITION.
         !iv_folder    TYPE string DEFAULT 'report'
         !iv_path      TYPE string DEFAULT ''
         !iv_file_name TYPE string DEFAULT 'report.docx'
-        !no_execute   TYPE xfeld DEFAULT '' .
+        !no_execute   TYPE xfeld DEFAULT '' 
+     RETURNING
+      value(iv_path_out) TYPE string .
 
 
 
@@ -1053,6 +1055,8 @@ CLASS lcl_docx IMPLEMENTATION.
     ENDIF.
 
     CONCATENATE lv_path '\' iv_folder '\'  iv_file_name  INTO lv_path.
+    
+    iv_path_out = lv_path.
 
     cl_gui_frontend_services=>gui_download( EXPORTING bin_filesize = lv_bytecount
                                                        filename     = lv_path
