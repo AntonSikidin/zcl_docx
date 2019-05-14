@@ -179,19 +179,23 @@ CLASS lcl_docx DEFINITION.
       IMPORTING
         !iv_path TYPE string
         !iv_data TYPE xstring.
+
+    METHODS get_raw
+    IMPORTING
+       !iv_protect   TYPE xfeld DEFAULT ''
+      RETURNING
+        value(rv_content) TYPE xstring.
+
     METHODS save
       IMPORTING
         !on_desktop   TYPE xfeld DEFAULT 'X'
         !iv_folder    TYPE string DEFAULT 'report'
         !iv_path      TYPE string DEFAULT ''
         !iv_file_name TYPE string DEFAULT 'report.docx'
-        !no_execute   TYPE xfeld DEFAULT '' 
-     RETURNING
-      value(iv_path_out) TYPE string .
-
-
-
-
+        !no_execute   TYPE xfeld DEFAULT ''
+        !iv_protect   TYPE xfeld DEFAULT ''
+      RETURNING
+        value(rv_path_out) TYPE string.
 
     METHODS map_data
       IMPORTING
@@ -234,7 +238,8 @@ CLASS lcl_docx DEFINITION.
         value(rr_fragment) TYPE REF TO if_ixml_document.
 
     METHODS normalize_key.
-    METHODS align_bookmark.
+    METHODS protect.
+
 
     METHODS get_from_zip_archive
       IMPORTING
@@ -471,392 +476,137 @@ CLASS lcl_docx IMPLEMENTATION.
 *               fname = 'after' ).
 
   ENDMETHOD.                    "normalize_key
-  METHOD align_bookmark.
+
+  METHOD protect.
+
+    DATA: lv_content       TYPE xstring,
+          lo_ixml          TYPE REF TO if_ixml,
+          lo_streamfactory TYPE REF TO if_ixml_stream_factory,
+          lo_istream       TYPE REF TO if_ixml_istream,
+          lo_parser        TYPE REF TO if_ixml_parser,
+          lr_element          TYPE REF TO if_ixml_element
+          .
+
+
     DATA
-           : lt_bokkmarks TYPE TABLE OF t_bookmark
-           .
+          : lr_settings TYPE REF TO if_ixml_document
+          .
+
+*--------------------------------------------------------------------*
+* Load XML file from archive into an input stream,
+* and parse that stream into an ixml object
+*--------------------------------------------------------------------*
+    lv_content        = me->get_from_zip_archive( 'word/settings.xml' ).
+
+    lo_ixml           = cl_ixml=>create( ).
+    lo_streamfactory  = lo_ixml->create_stream_factory( ).
+    lo_istream        = lo_streamfactory->create_istream_xstring( lv_content ).
+    lr_settings            = lo_ixml->create_document( ).
+    lo_parser         = lo_ixml->create_parser( stream_factory = lo_streamfactory
+                                                istream        = lo_istream
+                                                document       = lr_settings ).
+*    lo_parser->set_normalizing( 'X' ).
+    lo_parser->set_validating( mode = if_ixml_parser=>co_no_validation ).
+    lo_parser->parse( ).
+
 
     DATA
           : iterator TYPE REF TO if_ixml_node_iterator
+          , lr_node TYPE REF TO if_ixml_node
           .
-    iterator  = document->create_iterator( ).
+    iterator = lr_settings->create_iterator( ).
 
-    DO  .
-      DATA
-            : node TYPE REF TO if_ixml_node
-            .
-      node = iterator->get_next( ).
-
-      IF node IS INITIAL.
+    DO.
+      lr_node = iterator->get_next( ).
+      IF lr_node IS INITIAL.
         EXIT.
       ENDIF.
 
-      CHECK node->get_type( ) = if_ixml_node=>co_node_element.
+      CHECK lr_node->get_type( ) = if_ixml_node=>co_node_element.
 
       DATA
-            : name TYPE string
-            .
-      name = node->get_name( ).
-
-      CASE name.
-        WHEN 'bookmarkStart'.
-        WHEN 'bookmarkEnd'.
-        WHEN OTHERS.
-          CONTINUE.
-      ENDCASE.
-
-      DATA
-            : attributes TYPE REF TO if_ixml_named_node_map
-            .
-      attributes = node->get_attributes( ).
-
-      DATA
-            : lv_name TYPE string
-            , lv_id TYPE string
+            : lv_node_name TYPE string
             .
 
+      lv_node_name = lr_node->get_name( ).
 
-      DO attributes->get_length( ) TIMES.
+      CHECK  lv_node_name = 'settings'.
 
-        DATA: attribute TYPE REF TO if_ixml_node.
-        attribute = attributes->get_item( sy-index - 1 ).
+*      DATA(lv_xz) = lr_node->get_namespace_prefix( ).
 
-        CASE attribute->get_name( ).
-          WHEN 'id'.
-            lv_id = attribute->get_value( ).
+      lr_element = lr_settings->create_element_ns( name = 'documentProtection'
+                                                prefix = 'w' ).
 
-            FIELD-SYMBOLS
-                           : <fs_bookmark> TYPE t_bookmark
-                           .
-            READ TABLE lt_bokkmarks ASSIGNING <fs_bookmark> WITH KEY id = lv_id.
-            IF sy-subrc NE 0.
-              APPEND INITIAL LINE TO lt_bokkmarks ASSIGNING <fs_bookmark>.
-              <fs_bookmark>-id = lv_id.
-            ENDIF.
+      lr_element->set_attribute_ns( name = 'edit'
+                                 prefix = 'w'
+                                 value = 'readOnly' ).
 
-            CASE name.
-              WHEN 'bookmarkStart'.
-                <fs_bookmark>-start_node = node.
-                <fs_bookmark>-start_height = node->get_height( ).
-              WHEN 'bookmarkEnd'.
-                <fs_bookmark>-end_node = node.
-                <fs_bookmark>-end_height = node->get_height( ).
-            ENDCASE.
+      lr_element->set_attribute_ns( name = 'enforcement'
+                                 prefix = 'w'
+                                 value = '1' ).
+
+      lr_element->set_attribute_ns( name = 'cryptProviderType'
+                           prefix = 'w'
+                           value = 'rsaFull' ).
+
+      lr_element->set_attribute_ns( name = 'cryptAlgorithmClass'
+                          prefix = 'w'
+                          value = 'hash' ).
+
+      lr_element->set_attribute_ns( name = 'cryptAlgorithmType'
+                               prefix = 'w'
+                               value = 'typeAny' ).
+
+      lr_element->set_attribute_ns( name = 'cryptAlgorithmSid'
+                                 prefix = 'w'
+                                 value = '4' ).
+
+      lr_element->set_attribute_ns( name = 'cryptSpinCount'
+                                prefix = 'w'
+                                value = '100000' ).
+
+      lr_element->set_attribute_ns( name = 'hash'
+                                prefix = 'w'
+                                value = 'zApjmCLBrWyDDRNiRAmxszP+gYc=' ).
+
+      lr_element->set_attribute_ns( name = 'salt'
+                                 prefix = 'w'
+                                 value = 'erqLP912rJurhcV4a1bb8A==' ).
 
 
-          WHEN 'name'.
-            lv_name = attribute->get_value( ) .
-            TRANSLATE lv_name TO UPPER CASE.
-            attribute->set_value( lv_name ) .
-            <fs_bookmark>-name = lv_name.
+      lr_node->append_child( lr_element ) .
 
-
-        ENDCASE.
-
-      ENDDO.
+      EXIT.
 
     ENDDO.
 
 
-*    table or not
-
     DATA
-          : lv_node TYPE t_ref_node
-          , lv_ref_node TYPE t_ref_node
-          , lv_ref_node_2 TYPE t_ref_node
+          : lo_ostream        TYPE REF TO if_ixml_ostream
+          , lo_renderer       TYPE REF TO if_ixml_renderer
 
           .
 
-    LOOP AT lt_bokkmarks ASSIGNING <fs_bookmark>.
+* STEP 1: Create [Content_Types].xml into the root of the ZIP
+    lo_ixml = cl_ixml=>create( ).
 
+    CLEAR lv_content.
 
-      lv_node = <fs_bookmark>-start_node.
-      DO .
 
-        IF lv_node->is_root( ) IS NOT   INITIAL.
-          EXIT.
-        ENDIF.
+    lo_streamfactory = lo_ixml->create_stream_factory( ).
+    lo_ostream = lo_streamfactory->create_ostream_xstring( string = lv_content ).
+    lo_renderer = lo_ixml->create_renderer( ostream  = lo_ostream document = lr_settings ).
+    lo_renderer->render( ).
 
-        DATA
-              : node_name TYPE string
-              .
-        node_name               = lv_node->get_name( ).
+    zip->delete( name = 'word/settings.xml' ).
+    zip->add( name    = 'word/settings.xml'
+               content = lv_content ).
 
-        IF node_name = 'tr'.
-          <fs_bookmark>-in_table = 'X'.
-          EXIT.
-        ENDIF.
 
-        lv_node = lv_node->get_parent( ).
 
 
-      ENDDO.
 
-    ENDLOOP.
-
-
-    SORT lt_bokkmarks BY id ASCENDING .
-
-    LOOP AT lt_bokkmarks ASSIGNING <fs_bookmark>.
-
-      IF <fs_bookmark>-in_table = 'X'.
-
-        lv_ref_node = <fs_bookmark>-start_node.
-
-        DO .
-          node_name = lv_ref_node->get_name( ).
-
-          IF node_name = 'tr'.
-            lv_node = lv_ref_node->get_parent( ).
-            EXIT.
-          ENDIF.
-          lv_ref_node = lv_ref_node->get_parent( ).
-        ENDDO.
-
-        <fs_bookmark>-start_node->remove_node( ).
-        lv_node->insert_child( new_child = <fs_bookmark>-start_node
-                                  ref_child = lv_ref_node ).
-
-        CLEAR
-        : lv_ref_node_2
-        .
-
-        lv_ref_node_2 = <fs_bookmark>-end_node.
-
-        DO .
-          IF lv_ref_node_2 IS INITIAL.
-            EXIT.
-          ENDIF.
-          node_name = lv_ref_node_2->get_name( ).
-
-          IF node_name = 'tr'.
-            EXIT.
-          ENDIF.
-          lv_ref_node_2 = lv_ref_node_2->get_parent( ).
-        ENDDO.
-
-
-
-        IF lv_ref_node_2 IS NOT INITIAL.
-          <fs_bookmark>-end_node->remove_node( ).
-          lv_node->insert_child( new_child = <fs_bookmark>-end_node
-                          ref_child = lv_ref_node_2 ).
-*        ELSE.
-*          lv_node->append_child( new_child = <fs_bookmark>-end_node ).
-        ENDIF.
-
-      ELSE.
-
-        lv_ref_node = <fs_bookmark>-start_node->get_parent( ).
-        <fs_bookmark>-start_node->remove_node( ).
-        lv_node = lv_ref_node->get_parent( ).
-
-        lv_node->insert_child( new_child = <fs_bookmark>-start_node
-                              ref_child = lv_ref_node ).
-
-
-        DATA
-              : lv_height_start TYPE i
-              , lv_height_end TYPE i
-              .
-
-        lv_height_start = <fs_bookmark>-start_node->get_height( ).
-
-        lv_ref_node = <fs_bookmark>-end_node.
-
-        DO .
-
-          IF lv_ref_node IS INITIAL.
-            EXIT.
-          ENDIF.
-
-          lv_height_end = lv_ref_node->get_height( ).
-
-          IF lv_height_end = lv_height_start.
-            EXIT.
-          ENDIF.
-
-
-          lv_ref_node = lv_ref_node->get_parent( ).
-
-
-        ENDDO.
-
-        IF lv_ref_node NE <fs_bookmark>-end_node.
-          <fs_bookmark>-end_node->remove_node( ).
-
-          lv_node = lv_ref_node->get_parent( ).
-
-          lv_node->insert_child( new_child = <fs_bookmark>-end_node
-                                ref_child = lv_ref_node ).
-        ENDIF.
-
-      ENDIF.
-
-    ENDLOOP.
-
-
-
-    DATA
-          : lv_position TYPE i
-          , lt_stack_data TYPE TABLE OF t_stack_data
-          , lt_stack_data_sorted TYPE TABLE OF t_stack_data
-          , lt_id TYPE TABLE OF string
-
-          , lt_collision TYPE TABLE OF t_collision
-          , ls_collision TYPE t_collision
-
-          , lt_old TYPE TABLE OF t_ref_node
-          , lt_sorted TYPE TABLE OF t_ref_node
-          .
-
-    iterator = document->create_iterator( ).
-
-
-    DO  .
-      node = iterator->get_next( ).
-      IF node IS INITIAL.
-        EXIT.
-      ENDIF.
-      CHECK node->get_type( ) = if_ixml_node=>co_node_element.
-
-      name = node->get_name( ).
-
-      CASE name.
-        WHEN 'bookmarkStart'.
-        WHEN 'bookmarkEnd'.
-        WHEN OTHERS.
-          ADD 1 TO lv_position.
-
-          CONTINUE.
-      ENDCASE.
-
-      attributes = node->get_attributes( ).
-
-      FIELD-SYMBOLS
-                     : <fs_stack_data> TYPE t_stack_data
-                     .
-
-      APPEND INITIAL LINE TO lt_stack_data ASSIGNING <fs_stack_data>.
-
-      IF name = 'bookmarkStart'.
-        <fs_stack_data>-start = 'X'.
-      ENDIF.
-
-      <fs_stack_data>-position = lv_position.
-      <fs_stack_data>-collision = lv_position.
-      <fs_stack_data>-node = node.
-
-      ls_collision-collision = lv_position.
-      ls_collision-count  = 1.
-
-      COLLECT ls_collision INTO lt_collision.
-
-      DO attributes->get_length( ) TIMES.
-        attribute = attributes->get_item( sy-index - 1 ).
-        CHECK attribute->get_name( ) = 'id'.
-
-        <fs_stack_data>-id = attribute->get_value( ).
-        COLLECT <fs_stack_data>-id INTO lt_id.
-
-      ENDDO.
-
-    ENDDO.
-
-    lt_stack_data_sorted = lt_stack_data.
-
-    DATA
-          : lv_length TYPE i
-          .
-
-    FIELD-SYMBOLS
-                   : <fs_id> TYPE string
-                   .
-
-
-    LOOP AT lt_id ASSIGNING <fs_id>.
-
-      CLEAR lv_length.
-
-      LOOP AT lt_stack_data_sorted ASSIGNING <fs_stack_data> WHERE id = <fs_id>.
-
-        IF lv_length IS INITIAL.
-          lv_length = <fs_stack_data>-position.
-        ELSE.
-          lv_length = <fs_stack_data>-position - lv_length .
-        ENDIF.
-
-      ENDLOOP.
-
-      LOOP AT lt_stack_data_sorted ASSIGNING <fs_stack_data> WHERE id = <fs_id>.
-        CASE 'X'.
-          WHEN <fs_stack_data>-start.
-            <fs_stack_data>-length =  lv_length.
-          WHEN OTHERS.
-            <fs_stack_data>-length =  lv_length * -1 .
-        ENDCASE.
-      ENDLOOP.
-
-    ENDLOOP.
-
-    SORT lt_stack_data_sorted BY collision  start length DESCENDING.
-
-    FIELD-SYMBOLS
-                   : <fs_collision> TYPE t_collision
-                   .
-
-
-    LOOP AT lt_collision ASSIGNING <fs_collision> WHERE count > 1.
-
-      REFRESH
-      : lt_old
-      , lt_sorted
-      .
-
-      LOOP AT lt_stack_data ASSIGNING <fs_stack_data> WHERE collision = <fs_collision>-collision.
-        APPEND <fs_stack_data>-node TO lt_old.
-      ENDLOOP.
-
-      LOOP AT lt_stack_data_sorted ASSIGNING <fs_stack_data> WHERE collision = <fs_collision>-collision.
-        APPEND <fs_stack_data>-node TO lt_sorted.
-      ENDLOOP.
-
-      CHECK lt_old NE lt_sorted.
-
-      FIELD-SYMBOLS
-                     : <fs_old> TYPE t_ref_node
-                     .
-
-      READ TABLE lt_old ASSIGNING <fs_old> INDEX <fs_collision>-count.
-
-      CLEAR lv_ref_node.
-
-      lv_node = <fs_old>->get_parent( ).
-      lv_ref_node = <fs_old>->get_next( ).
-
-      LOOP AT lt_old ASSIGNING <fs_old>.
-        <fs_old>->remove_node( ).
-      ENDLOOP.
-
-      FIELD-SYMBOLS
-                     : <fs_sorted> TYPE t_ref_node
-                     .
-
-      LOOP AT lt_sorted ASSIGNING <fs_sorted>.
-
-        IF lv_ref_node IS NOT INITIAL.
-          lv_node->insert_child( new_child = <fs_sorted>
-                            ref_child = lv_ref_node ).
-        ELSE.
-
-          lv_node->append_child( new_child = <fs_sorted> ).
-        ENDIF.
-
-      ENDLOOP.
-
-    ENDLOOP.
-
-  ENDMETHOD.                    "align_bookmark
+  ENDMETHOD.                    "protect
 
   METHOD add_file.
 
@@ -866,19 +616,10 @@ CLASS lcl_docx IMPLEMENTATION.
                content = iv_data ).
 
   ENDMETHOD.                    "add_file
-  METHOD save.
 
-    DATA
-             : lv_content         TYPE xstring
-             , lv_content2         TYPE xstring
-             .
-
-*    dump_data( node = document
-*                   fname = 'before save' ).
-
-    lv_content = me->create_document( ).
-
-
+  METHOD get_raw.
+    CLEAR rv_content.
+    rv_content = me->create_document( ).
 
     DATA
           : lv_string TYPE string
@@ -887,27 +628,18 @@ CLASS lcl_docx IMPLEMENTATION.
           , lt_string TYPE TABLE OF string
           , lt_data TYPE TABLE OF text255
           .
-
-*    CALL FUNCTION 'Z_CNV_XSTRING_TO_STRING'
-*      EXPORTING
-*        iv_xstring = lv_content
-*      IMPORTING
-*        ev_string  = lv_string.
-
-
     DATA
           : converter TYPE REF TO cl_abap_conv_in_ce
           .
 
     CALL METHOD cl_abap_conv_in_ce=>create
       EXPORTING
-        input       = lv_content
+        input       = rv_content
         encoding    = 'UTF-8'
         replacement = '?'
         ignore_cerr = abap_true
       RECEIVING
         conv        = converter.
-
 
     TRY.
         CALL METHOD converter->read
@@ -921,9 +653,6 @@ CLASS lcl_docx IMPLEMENTATION.
       CATCH cx_parameter_invalid_range.
     ENDTRY.
 
-
-
-
     SPLIT lv_string AT '[SPACE]' INTO TABLE lt_string.
 
     DATA
@@ -936,8 +665,8 @@ CLASS lcl_docx IMPLEMENTATION.
     lv_rem = 255.
 
     FIELD-SYMBOLS
-    : <fs_str> TYPE string
-    .
+                   : <fs_str> TYPE string
+                   .
 
     LOOP AT lt_string ASSIGNING <fs_str>.
 
@@ -957,11 +686,8 @@ CLASS lcl_docx IMPLEMENTATION.
           lv_pos = lv_pos + lv_len.
           lv_rem = lv_rem - lv_len.
           CLEAR <fs_str>.
-
         ENDIF.
         lv_len = strlen( <fs_str> ).
-
-
 
       ENDWHILE.
 
@@ -978,15 +704,11 @@ CLASS lcl_docx IMPLEMENTATION.
         lv_pos = 1.
         lv_rem = 254.
         CLEAR lv_buf.
-
-
       ENDIF.
-
 
     ENDLOOP.
 
     APPEND lv_buf TO lt_data.
-
 
     FIELD-SYMBOLS
                    : <xstr> TYPE x
@@ -999,39 +721,42 @@ CLASS lcl_docx IMPLEMENTATION.
           , lv_str TYPE string
           .
 
-    CLEAR lv_content.
-*    loop at lt_data assigning <xstr> casting .
-*      concatenate lv_content <xstr> into lv_content in byte mode.
-*    endloop.
-
     FIELD-SYMBOLS
                    : <fs_data> TYPE text255
                    .
 
     LOOP AT lt_data ASSIGNING <fs_data>.
-
       CONCATENATE lv_str <fs_data> INTO lv_str RESPECTING BLANKS.
-
     ENDLOOP.
 
     DATA
-             : lr_conv_out TYPE REF TO cl_abap_conv_out_ce
-             , lv_echo_xstring TYPE xstring
-             .
+          : lr_conv_out TYPE REF TO cl_abap_conv_out_ce
+          , lv_echo_xstring TYPE xstring
+          .
 
     lr_conv_out = cl_abap_conv_out_ce=>create(
-      encoding    = 'UTF-8'               " Êîäèðîâêà â êîòîðóþ áóäåì ïðåîáðàçîâûâàòü
+      encoding    = 'UTF-8'
     ).
 
-
-    lr_conv_out->convert( EXPORTING data = lv_str IMPORTING buffer = lv_content ).
-
+    lr_conv_out->convert( EXPORTING data = lv_str IMPORTING buffer = rv_content ).
 
     zip->delete( name = me->c_document ).
     zip->add( name    = me->c_document
-               content = lv_content ).
+              content = rv_content ).
 
-    lv_content = zip->save( ).
+    IF iv_protect IS NOT INITIAL .
+      protect( ).
+    ENDIF.
+
+    rv_content = zip->save( ).
+  ENDMETHOD.                    "get_raw
+
+  METHOD save.
+
+    DATA
+             : lv_content TYPE xstring.
+
+    lv_content = me->get_raw( iv_protect ).
 
     DATA
           : lt_file_tab  TYPE solix_tab
@@ -1055,8 +780,8 @@ CLASS lcl_docx IMPLEMENTATION.
     ENDIF.
 
     CONCATENATE lv_path '\' iv_folder '\'  iv_file_name  INTO lv_path.
-    
-    iv_path_out = lv_path.
+
+    rv_path_out = lv_path.
 
     cl_gui_frontend_services=>gui_download( EXPORTING bin_filesize = lv_bytecount
                                                        filename     = lv_path
