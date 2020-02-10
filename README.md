@@ -32,7 +32,7 @@ Let reduce our document
   
 ![alt_text](images/z001_9.png "image_tooltip")  
  
-Structure of data for our document shoudt be like 
+Structure of data for our document shoudt be like  
 ├── name  
 ├── date  
 ├── time  
