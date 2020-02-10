@@ -1,167 +1,169 @@
-Tool to create Microsoft Word docx from abap.
+#Tool to create Microsoft Word docx from abap.
+
 
 Installation
 Install package via ABAPGIT https://docs.abapgit.org/guide-install.html
-
-![alt_text](images/z001_1.png "image_tooltip")
-
-![alt_text](images/z001_2.png "image_tooltip")
-
-![alt_text](images/z001_3.png "image_tooltip")
-![alt_text](images/z001_4.png "image_tooltip")
-![alt_text](images/z001_5.png "image_tooltip")
+  
+![alt_text](images/z001_1.png "image_tooltip")  
+  
+![alt_text](images/z001_2.png "image_tooltip")  
+  
+![alt_text](images/z001_3.png "image_tooltip")    
+![alt_text](images/z001_4.png "image_tooltip")    
+![alt_text](images/z001_5.png "image_tooltip")  
 
 Where there are mistakes, just click Pull_zip twice.
 
 For example, the following document should be created:
+  
+![alt_text](images/z001_6.png "image_tooltip")  
 
-![alt_text](images/z001_6.png "image_tooltip")
-
-Initially, define variables and repeated parts
+Initially, define variables and repeated parts  
+![alt_text](images/z001_7.png "image_tooltip")  
  
 Variable – simple text.
 Table line – contains table row that may consist of several or zero variables and text.
 Document – contain several or zero texts, variables, table row.
 
-We have something like this 
-![alt_text](images/z001_7.png "image_tooltip")
+We have something like this   
+![alt_text](images/z001_8.png "image_tooltip")  
 
 Let reduce our document
-
-![alt_text](images/z001_8.png "image_tooltip")
+  
+![alt_text](images/z001_9.png "image_tooltip")  
  
 Structure of data for our document shoudt be like 
-├── name
-├── date
-├── time
-├── document1
-│   ├── data_row
-│   │   ├── CARRID
-│   │   ├── CLASS
-│   │   ├── FORCURAM
-│   │   ├── LOCCURAM
-│   │   ├── LOCCURKEY
-│   │   └── ORDER_DATE
-│   │    .
-│   │    .
-│   ├── data_row
-│   │   ├── CARRID
-│   │   ├── CLASS
-│   │   ├── FORCURAM
-│   │   ├── LOCCURAM
-│   │   ├── LOCCURKEY
-│   │   └── ORDER_DATE
-│   └── subtotal
-│       ├── FORCURKEY
-│       └── LOCCURAM
-│    .
-│    .
-├── document1
-│   ├── data_row
-│   │   ├── CARRID
-│   │   ├── CLASS
-│   │   ├── FORCURAM
-│   │   ├── LOCCURAM
-│   │   ├── LOCCURKEY
-│   │   └── ORDER_DATE
-│   │    .
-│   │    .
-│   ├── data_row
-│   │   ├── CARRID
-│   │   ├── CLASS
-│   │   ├── FORCURAM
-│   │   ├── LOCCURAM
-│   │   ├── LOCCURKEY
-│   │   └── ORDER_DATE
-│   └── subtotal
-│       ├── FORCURKEY
-│       └── LOCCURAM
-├── total 
-│   ├── FORCURKEY
-│   └── LOCCURAM
-├── sign
-│   ├── NAME_FIRST 
-│   └── NAME_LAST
-│   .
-│   .
-└── sign    
-    ├── NAME_FIRST
-    └── NAME_LAST
-
- 
+├── name  
+├── date  
+├── time  
+├── document1  
+│   ├── data_row  
+│   │   ├── CARRID  
+│   │   ├── CLASS  
+│   │   ├── FORCURAM  
+│   │   ├── LOCCURAM  
+│   │   ├── LOCCURKEY  
+│   │   └── ORDER_DATE  
+│   │    .  
+│   │    .  
+│   ├── data_row  
+│   │   ├── CARRID  
+│   │   ├── CLASS  
+│   │   ├── FORCURAM  
+│   │   ├── LOCCURAM  
+│   │   ├── LOCCURKEY  
+│   │   └── ORDER_DATE  
+│   └── subtotal  
+│       ├── FORCURKEY  
+│       └── LOCCURAM  
+│    .  
+│    .  
+├── document1  
+│   ├── data_row  
+│   │   ├── CARRID  
+│   │   ├── CLASS  
+│   │   ├── FORCURAM  
+│   │   ├── LOCCURAM  
+│   │   ├── LOCCURKEY  
+│   │   └── ORDER_DATE  
+│   │    .  
+│   │    .  
+│   ├── data_row  
+│   │   ├── CARRID  
+│   │   ├── CLASS  
+│   │   ├── FORCURAM  
+│   │   ├── LOCCURAM  
+│   │   ├── LOCCURKEY  
+│   │   └── ORDER_DATE  
+│   └── subtotal  
+│       ├── FORCURKEY  
+│       └── LOCCURAM  
+├── total   
+│   ├── FORCURKEY  
+│   └── LOCCURAM  
+├── sign  
+│   ├── NAME_FIRST   
+│   └── NAME_LAST  
+│   .  
+│   .  
+└── sign      
+    ├── NAME_FIRST  
+    └── NAME_LAST  
+  
+   
 Or simple
 
-├── name  (value)
-├── date  (value)
-├── time  (value)
-├── document1   (document repeated)
-│   ├── data_row  (table repeated)
-│   │   ├── CARRID
-│   │   ├── CLASS
-│   │   ├── FORCURAM
-│   │   ├── LOCCURAM
-│   │   ├── LOCCURKEY
-│   │   └── ORDER_DATE
-│   └── subtotal (table of 1 row)
-│       ├── FORCURKEY
-│       └── LOCCURAM
-├── total (table of 1 row)
-│   ├── FORCURKEY
-│   └── LOCCURAM
-└── sign    (table repeated)
-    ├── NAME_FIRST
-    └── NAME_LAST
-
-
+├── name  (value)  
+├── date  (value)  
+├── time  (value)  
+├── document1   (document repeated)  
+│   ├── data_row  (table repeated)  
+│   │   ├── CARRID  
+│   │   ├── CLASS  
+│   │   ├── FORCURAM  
+│   │   ├── LOCCURAM  
+│   │   ├── LOCCURKEY  
+│   │   └── ORDER_DATE  
+│   └── subtotal (table of 1 row)  
+│       ├── FORCURKEY  
+│       └── LOCCURAM  
+├── total (table of 1 row)  
+│   ├── FORCURKEY  
+│   └── LOCCURAM  
+└── sign    (table repeated)  
+    ├── NAME_FIRST  
+    └── NAME_LAST  
+  
+  
 Let sign variable placeholder.
 
 At first toggle developer toolbar. https://www.google.com/search?q=microsoft+office+16+toggle+developer+toolbar
 
-Select
-![alt_text](images/z001_9.png "image_tooltip")
-Make tag
-![alt_text](images/z001_10.png "image_tooltip")
+Select  
+![alt_text](images/z001_10.png "image_tooltip")  
+Make tag  
+![alt_text](images/z001_11.png "image_tooltip")  
 
 
-Click properties 
-![alt_text](images/z001_11.png "image_tooltip")
+Click properties   
+![alt_text](images/z001_12.png "image_tooltip")  
 
-Enter tag name
-![alt_text](images/z001_12.png "image_tooltip")
+Enter tag name  
+![alt_text](images/z001_13.png "image_tooltip")  
 
 Tag name is case insensitive; all the way, it will be converted to uppercase
 
 Value can have any tag name, value inside table row must have name of field of row structure 
-For example,  tag name for sign row
-![alt_text](images/z001_13.png "image_tooltip")
+For example,  tag name for sign row    
+![alt_text](images/z001_14.png "image_tooltip")  
 
 Name all variable placeholder
-In design time it must look like this
-![alt_text](images/z001_14.png "image_tooltip")
+In design time it must look like this    
+![alt_text](images/z001_15.png "image_tooltip")  
 
 
 At second we mark placeholder for table row(data_row, subtotal, total, sign)
-Place mouse cursor to the left of row 
-![alt_text](images/z001_15.png "image_tooltip")
+Place mouse cursor to the left of row   
+![alt_text](images/z001_16.png "image_tooltip")  
 
-Click 
-![alt_text](images/z001_16.png "image_tooltip")
-![alt_text](images/z001_17.png "image_tooltip")
+Click   
+![alt_text](images/z001_17.png "image_tooltip")    
+![alt_text](images/z001_18.png "image_tooltip")  
 
-Properties, data_row
-![alt_text](images/z001_18.png "image_tooltip")
+Properties, data_row  
+![alt_text](images/z001_19.png "image_tooltip")  
 
-Subtotal
-![alt_text](images/z001_19.png "image_tooltip")
+Subtotal  
+![alt_text](images/z001_20.png "image_tooltip")  
 
-Total
-![alt_text](images/z001_20.png "image_tooltip")
+Total  
+![alt_text](images/z001_21.png "image_tooltip")  
 
-Sign
-![alt_text](images/z001_21.png "image_tooltip")
+Sign  
+![alt_text](images/z001_22.png "image_tooltip")  
 
-Then template in design mode must look like
-![alt_text](images/z001_22.png "image_tooltip")
+Then template in design mode must look like  
+![alt_text](images/z001_23.png "image_tooltip")  
 
 Now, we move on to the task with an asterisk. In 99% cases you do not need this. I just show opportunity how to make more complex document.
 If you want, you can make infinite depth of your document.
@@ -173,124 +175,124 @@ There we have 2 way:
 
 First way:
 
-Copy your table 3 times 
-![alt_text](images/z001_23.png "image_tooltip")
+Copy your table 3 times   
+![alt_text](images/z001_24.png "image_tooltip")  
 
-Cut unnecessary part from each table 
-![alt_text](images/z001_24.png "image_tooltip")
+Cut unnecessary part from each table   
+![alt_text](images/z001_25.png "image_tooltip")  
 
-Make placeholder for whole second table
-![alt_text](images/z001_25.png "image_tooltip")
+Make placeholder for whole second table  
+![alt_text](images/z001_26.png "image_tooltip")  
 
 
 Remove spaces between tables
-In my case, it look like
-![alt_text](images/z001_26.png "image_tooltip")
+In my case, it look like  
+![alt_text](images/z001_27.png "image_tooltip")  
 
 I don’t like this, maybe, I cannot work with tables.
 
 Second way I prefer:
-Select two rows, make placeholder. Office create placeholder for first row. It is ok.
-![alt_text](images/z001_27.png "image_tooltip")
-
-![alt_text](images/z001_28.png "image_tooltip")
+Select two rows, make placeholder. Office create placeholder for first row. It is ok.  
+![alt_text](images/z001_28.png "image_tooltip")  
+  
+![alt_text](images/z001_29.png "image_tooltip")  
 
 Now, save the template, close office.
 
-Rename template.docx to template.zip
-![alt_text](images/z001_29.png "image_tooltip")
-![alt_text](images/z001_30.png "image_tooltip")
+Rename template.docx to template.zip  
+![alt_text](images/z001_30.png "image_tooltip")    
+![alt_text](images/z001_31.png "image_tooltip")  
 
-Unpack to subfolder
-![alt_text](images/z001_31.png "image_tooltip")
+Unpack to subfolder  
+![alt_text](images/z001_32.png "image_tooltip")  
 
-Navigate inside, then in subfolder ‘word’ 
-![alt_text](images/z001_32.png "image_tooltip")
+Navigate inside, then in subfolder ‘word’   
+![alt_text](images/z001_33.png "image_tooltip")  
 
 We need notepad++ https://notepad-plus-plus.org/downloads/
 
-Open document.xml with notepad++ 
-![alt_text](images/z001_33.png "image_tooltip")
+Open document.xml with notepad++   
+![alt_text](images/z001_34.png "image_tooltip")  
 
-Navigate plugin->plugins admin..
-![alt_text](images/z001_34.png "image_tooltip")
+Navigate plugin->plugins admin..  
+![alt_text](images/z001_35.png "image_tooltip")  
 
-Search “Xml tools”
-![alt_text](images/z001_35.png "image_tooltip")
+Search “Xml tools”  
+![alt_text](images/z001_36.png "image_tooltip")  
 
 Install
-Now you can pretty print xml document
-![alt_text](images/z001_36.png "image_tooltip")
+Now you can pretty print xml document  
+![alt_text](images/z001_37.png "image_tooltip")  
+  
+![alt_text](images/z001_38.png "image_tooltip")  
 
-![alt_text](images/z001_37.png "image_tooltip")
-
-Find placeholder we created. In our case it document2
-![alt_text](images/z001_38.png "image_tooltip")
+Find placeholder we created. In our case it document2  
+![alt_text](images/z001_39.png "image_tooltip")  
 Ctrl+f
-
-![alt_text](images/z001_39.png "image_tooltip")
+  
+![alt_text](images/z001_40.png "image_tooltip")  
 
 We can see our placeholder
-<w:tag w:val="document2"/>
-![alt_text](images/z001_40.png "image_tooltip")
+<w:tag w:val="document2"/>  
+![alt_text](images/z001_41.png "image_tooltip")  
 
 It starts in line 1293 with tag <w:sdt>
 
-Collapse tree to see where it end
-![alt_text](images/z001_41.png "image_tooltip")
+Collapse tree to see where it end  
+![alt_text](images/z001_42.png "image_tooltip")  
 
-It end near line 1621
-![alt_text](images/z001_42.png "image_tooltip")
+It end near line 1621  
+![alt_text](images/z001_43.png "image_tooltip")  
 
-Now collapse next placeholder to see where it ends
-![alt_text](images/z001_43.png "image_tooltip")
+Now collapse next placeholder to see where it ends  
+![alt_text](images/z001_44.png "image_tooltip")  
 
-It ends near line  1757 
-![alt_text](images/z001_44.png "image_tooltip")
+It ends near line  1757   
+![alt_text](images/z001_45.png "image_tooltip")  
 
 Expand all.
 Go to line 1621
-Cut 2 lines  1619, 1620 
-![alt_text](images/z001_45.png "image_tooltip")
+Cut 2 lines  1619, 1620   
+![alt_text](images/z001_46.png "image_tooltip")  
 
         </w:sdtContent>
-      </w:sdt>
-![alt_text](images/z001_46.png "image_tooltip")
+      </w:sdt>  
+![alt_text](images/z001_47.png "image_tooltip")  
 
-Navigate to line 1757
-![alt_text](images/z001_47.png "image_tooltip")
+Navigate to line 1757  
+![alt_text](images/z001_48.png "image_tooltip")  
 
-Insert 2 lines before line 1757
-![alt_text](images/z001_48.png "image_tooltip")
+Insert 2 lines before line 1757  
+![alt_text](images/z001_49.png "image_tooltip")  
 
 Yellow – inserted lines.
 
 Save, close.
 
-Navigate 1 level up 
-![alt_text](images/z001_49.png "image_tooltip")
-![alt_text](images/z001_50.png "image_tooltip")
+Navigate 1 level up   
+![alt_text](images/z001_50.png "image_tooltip")    
+![alt_text](images/z001_51.png "image_tooltip")  
 
-Select all file at this level, add to zip archive 
-![alt_text](images/z001_51.png "image_tooltip")
-![alt_text](images/z001_52.png "image_tooltip")
+Select all file at this level, add to zip archive   
+![alt_text](images/z001_52.png "image_tooltip")    
+![alt_text](images/z001_53.png "image_tooltip")  
 
 Rename template_docx.zip to template_docx.docx
 
-Now we can see placeholder hold 2 rows
-![alt_text](images/z001_53.png "image_tooltip")
+Now we can see placeholder hold 2 rows  
+![alt_text](images/z001_54.png "image_tooltip")  
 
 Go to transaction smw0
-Select Binary data, enter
-![alt_text](images/z001_54.png "image_tooltip")
+Select Binary data, enter  
+![alt_text](images/z001_55.png "image_tooltip")  
 Object name                     Z_TEST_DOCX2
-
-![alt_text](images/z001_55.png "image_tooltip")
-Create
-![alt_text](images/z001_56.png "image_tooltip")
-![alt_text](images/z001_57.png "image_tooltip")
-
-![alt_text](images/z001_58.png "image_tooltip")
+  
+![alt_text](images/z001_56.png "image_tooltip")  
+Create  
+![alt_text](images/z001_57.png "image_tooltip")    
+![alt_text](images/z001_58.png "image_tooltip")  
+  
+![alt_text](images/z001_59.png "image_tooltip")  
 
 Now let’s create test program.
 
@@ -504,9 +506,9 @@ START-OF-SELECTION.
 ```
 	  
 Run program and get something like this
-
-![alt_text](images/z001_59.png "image_tooltip")
-![alt_text](images/z001_60.png "image_tooltip")
+  
+![alt_text](images/z001_60.png "image_tooltip")    
+![alt_text](images/z001_61.png "image_tooltip")  
 
 
 
