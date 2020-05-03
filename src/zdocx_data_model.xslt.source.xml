@@ -1,0 +1,26 @@
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" version="1.0">
+
+  <xsl:template match="/">
+    <xsl:element name="DATA">
+      <xsl:apply-templates/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="w:sdt">
+    <xsl:choose>
+      <xsl:when test="./w:sdtPr/w:tag/@w:val">
+        <xsl:element name="{./w:sdtPr/w:tag/@w:val}">
+          <xsl:apply-templates/>
+        </xsl:element>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:element name="item">
+          <xsl:apply-templates/>
+        </xsl:element>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="text()"/>
+
+</xsl:stylesheet>

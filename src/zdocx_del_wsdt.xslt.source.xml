@@ -1,0 +1,29 @@
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" version="2.0">
+
+  <xsl:strip-space elements="*"/>
+
+  <xsl:template match="@*|node()">
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="w:sdt">
+
+    <xsl:variable name="is_content">
+      <xsl:value-of select="count(w:sdtContent)"/>
+    </xsl:variable>
+
+    <xsl:choose>
+      <xsl:when test="$is_content = 0">
+
+        <xsl:apply-templates select="./*"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates select="w:sdtContent/*"/>
+      </xsl:otherwise>
+    </xsl:choose>
+
+  </xsl:template>
+
+</xsl:stylesheet>

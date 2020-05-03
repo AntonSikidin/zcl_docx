@@ -1,13 +1,14 @@
-# Best way  to create Microsoft Word docx from abap.
+# Best way to create Microsoft Word docx from ABAP.
 
-Maybe youtube video explain better than me
+Maybe, this video instruction explain better than me.
 
-whatch in 1080p
+Watch in 1080p.
 
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/iScstHjoQ4U/0.jpg)](http://www.youtube.com/watch?v=iScstHjoQ4U "best way to generate microsoft word docx from abap")
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/iScstHjoQ4U/0.jpg)](http://www.youtube.com/watch?v=iScstHjoQ4U "Best way to create Microsoft Word docx from ABAP.")
 
 
-Installation Install package via ABAPGIT https://docs.abapgit.org/guide-install.html
+Installation:
+Install package via ABAPGIT  https://docs.abapgit.org/guide-install.html
 
  
 ![alt_text](images/z002_01.png "image_tooltip") 
@@ -32,53 +33,53 @@ For example, the following document should be created:
 ![alt_text](images/z002_06.png "image_tooltip") 
 
 
-At first toggle developer toolbar.  
-File-> options -> Customize ribbon 
+At first toggle developer toolbar.
+File -> Options -> Customize ribbon
+
  
 
 ![alt_text](images/z002_07.png "image_tooltip") 
 
-Go to developer tab, turn on “design mode”
+Go to developer tab, turn on “design mode”.
  
 ![alt_text](images/z002_08.png "image_tooltip") 
 
-Select text that wil be replaced
+Select text that will be replaced.
  
 ![alt_text](images/z002_09.png "image_tooltip") 
 
- make tag
+ Make tag.
  
 ![alt_text](images/z002_10.png "image_tooltip") 
 
 
-Click properties
+Click properties.
  
 ![alt_text](images/z002_11.png "image_tooltip") 
 
 
-Enter tag name
+Enter tag name.
 
  
 ![alt_text](images/z002_12.png "image_tooltip") 
 
 
 
-Repeat for all wariable.
+Repeat for all variable.
+For repeated rows or text fragment - select row or text fragment, make repeated control.
 
-For repeated rows or text fragment select row or text fragment, make repeated control
 
  
 ![alt_text](images/z002_13.png "image_tooltip") 
 
-To enter properties of repeated control place cursor in the begin or end control
+To enter properties of repeated control place cursor in the begin or end control.
 
  
 ![alt_text](images/z002_14.png "image_tooltip") 
 
-Tag all variables and repeated part
+Tag all variables and repeated part.
+Save document. Go to transaction smw0 Select Binary data, enter.
 
-Save document.
-Go to transaction smw0 Select Binary data, enter
 
  
 ![alt_text](images/z002_15.png "image_tooltip") 
@@ -99,36 +100,37 @@ Object name zdocx_example
 ![alt_text](images/z002_19.png "image_tooltip") 
 
 
-Go to se38 
-Program ZDOCX_GET_TYPES
-Navigate to your template
+Go to se38.
+Program ZDOCX_GET_TYPES.
+Navigate to your template.
+
  
 ![alt_text](images/z002_20.png "image_tooltip") 
 
 
 Run.
+Program generate data types, based on your document structure.
 
-Program generate data types, based on your document strucrure.
  
 ![alt_text](images/z002_21.png "image_tooltip") 
 
-Copy to your program
+Copy to your program.
+Define variable.
 
-Define variable
 ```
 Data
 : gs_templ_data TYPE t_data
 .
 ```
 
-fill structure with your data.
+Fill structure with your data.
+Then get document.
 
-Then get document
 ```
 
 zcl_docx3=>get_document(
-    iv_w3objid    = 'ZDOCX_EXAMLE' " name of our template, obligatory
-*      iv_on_desktop = 'X'           " by default save document on desktop
+    iv_w3objid    = 'ZDOCX_EXAMLE'   " name of our template
+*      iv_template   = ''            " you can feed template as xstring instead of load from smw0
 *      iv_folder     = 'report'      " in folder by default 'report'
 *      iv_path       = ''            " IF iv_path IS INITIAL  save on desctop or sap_tmp folder
 *      iv_file_name  = 'report.docx' " file name by default
@@ -141,7 +143,7 @@ zcl_docx3=>get_document(
 ```
 
  
-Whole program  “ZDOCX_EXAMPLE”
+Whole program “ZDOCX_EXAMPLE”:
 ```
 *&---------------------------------------------------------------------*
 *& Report ZDOCX_EXAMPLE
@@ -369,7 +371,8 @@ PERFORM send_document_as_attachment USING lv_document.
 *second case: save on desctop and open document
 
 zcl_docx3=>get_document(
-    iv_w3objid    = 'ZDOCX_EXAMLE' " name of our template, obligatory
+    iv_w3objid    = 'ZDOCX_EXAMLE'   " name of our template
+*      iv_template   = ''            " you can feed template as xstring instead of load from smw0
 *      iv_on_desktop = 'X'           " by default save document on desktop
 *      iv_folder     = 'report'      " in folder by default 'report'
 *      iv_path       = ''            " IF iv_path IS INITIAL  save on desctop or sap_tmp folder

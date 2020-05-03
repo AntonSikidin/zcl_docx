@@ -1,0 +1,111 @@
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" version="2.0">
+
+     <xsl:strip-space elements="*"/>
+
+    <xsl:template match="@* | node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@* | node()"/>
+        </xsl:copy>
+    </xsl:template>
+
+
+    <!-- нашли ноду -->
+    <xsl:template match="w:sdt">
+
+        <!-- есть ли у нее tag -->
+        <xsl:variable name="is_tag">
+            <xsl:value-of select="count(w:sdtPr/w:tag)"/>
+        </xsl:variable>
+
+        <xsl:choose>
+            <!-- tag есть -->
+            <xsl:when test="$is_tag = 1">
+
+                <!-- простая переменная или структура?  0 - переменная -->
+                <xsl:variable name="is_var">
+                    <xsl:value-of select="count(w:sdtContent//w:tag)"/>
+                </xsl:variable>
+
+                <xsl:choose>
+                    <!--  переменная  -->
+                    <xsl:when test="$is_var = 0">
+
+                        <xsl:element name="w:sdt">
+                            <xsl:for-each select="./*">
+
+                                <xsl:variable name="name">
+                                    <xsl:value-of select="name()"/>
+                                </xsl:variable>
+
+                                <xsl:choose>
+                                    <xsl:when test="$name != 'w:sdtContent'">
+                                        <xsl:copy-of select="current()"/>
+                                    </xsl:when>
+
+                                    <xsl:otherwise>
+                                        <xsl:element name="w:sdtContent">
+                                            <xsl:variable name="is_p">
+                                                <xsl:value-of select="count(w:p)"/>
+                                            </xsl:variable>
+
+                                            <xsl:choose>
+                                                <xsl:when test="$is_p = 0">
+                                                    <xsl:copy-of select="w:r[1]"/>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:call-template name="write_p">
+                                                        <xsl:with-param name="data_nodeset" select="w:p[1]"/>
+                                                    </xsl:call-template>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                        </xsl:element>
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </xsl:for-each>
+
+                        </xsl:element>
+
+
+
+                    </xsl:when>
+
+                    <!-- default copy -->
+                    <xsl:otherwise>
+                        <xsl:copy>
+                            <xsl:apply-templates select="@* | node()"> </xsl:apply-templates>
+                        </xsl:copy>
+                    </xsl:otherwise>
+
+                </xsl:choose>
+
+            </xsl:when>
+
+
+            <!-- default copy -->
+            <xsl:otherwise>
+                <xsl:copy>
+                    <xsl:apply-templates select="@* | node()"> </xsl:apply-templates>
+                </xsl:copy>
+            </xsl:otherwise>
+        </xsl:choose>
+
+    </xsl:template>
+
+    <xsl:template name="write_p">
+        <xsl:param name="data_nodeset"/>
+
+        <xsl:element name="w:p">
+
+            <xsl:for-each select="$data_nodeset/*[name()!='w:r']">
+                <xsl:copy-of select="current()"/>
+            </xsl:for-each>
+
+            <xsl:copy-of select="$data_nodeset/w:r[1]"/>
+
+        </xsl:element>
+
+    </xsl:template>
+
+</xsl:stylesheet>
