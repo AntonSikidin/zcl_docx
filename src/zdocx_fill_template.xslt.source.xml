@@ -1,27 +1,21 @@
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" version="1.0">
-
+<?xml version="1.0"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"
+xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
   <xsl:param name="DATA"/>
-
-
   <!-- convert -->
   <xsl:variable name="data_nodeset">
     <xsl:for-each select="$DATA">
       <xsl:copy-of select="current()"/>
     </xsl:for-each>
   </xsl:variable>
-
-
   <xsl:variable name="LowerCase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="UpperCase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
-
-   <xsl:strip-space elements="*"/>
-
+  <xsl:strip-space elements="*"/>
   <!-- default copy -->
   <xsl:template match="@* | node()">
     <xsl:param name="text_value" select="string('')"/>
     <xsl:param name="prev_data_nodeset"/>
     <xsl:param name="use_new_value" select="string('')"/>
-
     <xsl:copy>
       <xsl:apply-templates select="@* | node()">
         <xsl:with-param name="text_value" select="$text_value"/>
@@ -30,17 +24,12 @@
       </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
-
   <!--  запролняем переменную-->
-
   <xsl:template match="w:t">
     <xsl:param name="text_value" select="string('')"/>
     <xsl:param name="use_new_value" select="string('')"/>
-
     <xsl:copy>
-
       <xsl:copy-of select="@*"/>
-
       <xsl:choose>
         <xsl:when test="$use_new_value != ''">
           <xsl:value-of select="$text_value"/>
@@ -49,63 +38,72 @@
           <xsl:value-of select="."/>
         </xsl:otherwise>
       </xsl:choose>
-
     </xsl:copy>
-
   </xsl:template>
-
   <!-- нашли ноду -->
   <xsl:template match="w:sdt">
     <xsl:param name="text_value" select="string('')"/>
     <xsl:param name="prev_data_nodeset"/>
-
     <!-- есть ли у нее tag -->
     <xsl:variable name="is_tag">
       <xsl:value-of select="count(w:sdtPr/w:tag)"/>
     </xsl:variable>
-
+    <!-- есть ли у нее check_box -->
+    <xsl:variable name="is_check_box">
+      <xsl:value-of select="count(w:sdtPr/w14:checkbox)"/>
+    </xsl:variable>
     <xsl:choose>
       <!-- tag есть -->
       <xsl:when test="$is_tag = 1">
-
         <xsl:variable name="tag_name">
           <xsl:value-of select="translate(w:sdtPr/w:tag/@w:val, $LowerCase, $UpperCase)"/>
         </xsl:variable>
-
-
         <!-- простая переменная или структура?  0 - переменная, >0 - структура или таблица -->
-
         <xsl:variable name="is_var">
           <xsl:value-of select="count(w:sdtContent//w:tag)"/>
         </xsl:variable>
-
         <xsl:variable name="tmp1_curr_data_nodeset">
-
           <xsl:choose>
             <xsl:when test="$prev_data_nodeset != ''">
               <xsl:copy-of select="$prev_data_nodeset"/>
-
             </xsl:when>
             <xsl:otherwise>
               <xsl:copy-of select="$data_nodeset"/>
             </xsl:otherwise>
           </xsl:choose>
         </xsl:variable>
-
-
         <xsl:variable name="curr_data_nodeset">
           <xsl:copy-of select="$tmp1_curr_data_nodeset/child::*/child::*"/>
         </xsl:variable>
-
-
         <xsl:choose>
           <xsl:when test="$is_var = 0">
-            <!--  переменная  -->
-
-            <xsl:variable name="value">
+            <!-- временная переменная  -->
+            <xsl:variable name="tmp_value">
               <xsl:value-of select="$curr_data_nodeset/*[name() = $tag_name]"/>
             </xsl:variable>
-
+            <!--  переменная  -->
+            <xsl:variable name="value">
+              <xsl:choose>
+                <xsl:when test="$is_check_box = 0">
+                  <!--  не чекбокс  -->
+                  <xsl:value-of select="$tmp_value"/>
+                  <!--  копируем переменную  -->
+                </xsl:when>
+                <xsl:otherwise>
+                  <!--  тут чекбокс  -->
+                  <xsl:choose>
+                    <xsl:when test="$tmp_value != ''">
+                      <!--  тут крестик  -->
+                      <xsl:value-of select="string('[E29892]')"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <!--  тут без крестика  -->
+                      <xsl:value-of select="string('[E29890]')"/>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:variable>
             <xsl:element name="w:sdt">
               <xsl:apply-templates select="w:sdtContent">
                 <xsl:with-param name="text_value" select="$value"/>
@@ -113,23 +111,35 @@
               </xsl:apply-templates>
             </xsl:element>
           </xsl:when>
-
           <xsl:otherwise>
             <!--  структура или таблица, структуру просто применить, таблицу размножать  -->
             <!--  у структуры нет 'item', у таблицы есть -->
-
             <xsl:variable name="tmp_curr_data_nodeset" select="$curr_data_nodeset/*[name() = $tag_name]"> </xsl:variable>
-
             <!--  структура или таблица  0 - структура, >0 - таблица -->
             <xsl:variable name="is_tab">
               <xsl:value-of select="count($tmp_curr_data_nodeset/*[name() = 'item'])"/>
             </xsl:variable>
-
-
+            <!--  это может быть пустая таблица -->
+            <xsl:variable name="is_tab2">
+              <xsl:choose>
+                <xsl:when test="$is_tab = 0">
+                  <xsl:choose>
+                    <xsl:when test="count($tmp_curr_data_nodeset/*) = 0">
+                      <xsl:value-of select="1"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:value-of select="0"/>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="1"/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:variable>
             <xsl:choose>
-
               <!--  структура  -->
-              <xsl:when test="$is_tab = 0">
+              <xsl:when test="$is_tab2 = 0">
                 <xsl:element name="w:sdt">
                   <xsl:apply-templates select="w:sdtContent">
                     <xsl:with-param name="prev_data_nodeset" select="$tmp_curr_data_nodeset"/>
@@ -138,36 +148,28 @@
               </xsl:when>
               <!--  таблица  -->
               <xsl:otherwise>
-
                 <xsl:variable name="curr_nodeset" select="current()/w:sdtContent"/>
-
                 <xsl:for-each select="$tmp_curr_data_nodeset/*">
-
                   <xsl:element name="w:sdt">
                     <xsl:apply-templates select="$curr_nodeset/*">
                       <xsl:with-param name="prev_data_nodeset" select="current()"/>
                     </xsl:apply-templates>
                   </xsl:element>
                 </xsl:for-each>
-
               </xsl:otherwise>
             </xsl:choose>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:when>
-
       <!-- default copy -->
       <xsl:otherwise>
         <xsl:copy>
           <xsl:apply-templates select="@* | node()">
             <xsl:with-param name="text_value" select="$text_value"/>
             <xsl:with-param name="prev_data_nodeset" select="$prev_data_nodeset"/>
-
           </xsl:apply-templates>
         </xsl:copy>
       </xsl:otherwise>
     </xsl:choose>
-
   </xsl:template>
-
 </xsl:stylesheet>

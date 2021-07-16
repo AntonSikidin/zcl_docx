@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
  <asx:values>
   <DATA>
-   <MASTER_LANGUAGE>E</MASTER_LANGUAGE>
+   <MASTER_LANGUAGE>8</MASTER_LANGUAGE>
    <STARTING_FOLDER>/src/</STARTING_FOLDER>
    <FOLDER_LOGIC>PREFIX</FOLDER_LOGIC>
    <IGNORE>
@@ -13,8 +13,6 @@
     <item>/.travis.yml</item>
     <item>/.gitlab-ci.yml</item>
     <item>/abaplint.json</item>
-    <item>/azure-pipelines.yml</item>
-    <item>/zcl_docx_v3.zip</item>
    </IGNORE>
   </DATA>
  </asx:values>

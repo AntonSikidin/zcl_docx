@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZDOCX_GET_TYPES</NAME>
+    <NAME>ZDOCX_EXAMPLE_CHECKBOX</NAME>
     <STATE>A</STATE>
     <VARCL>X</VARCL>
     <SUBC>1</SUBC>
@@ -17,26 +17,8 @@
      <TEXTPOOL>
       <item>
        <ID>R</ID>
-       <ENTRY>get type definitions from template</ENTRY>
-       <LENGTH>34</LENGTH>
-      </item>
-      <item>
-       <ID>S</ID>
-       <KEY>P_FPATH</KEY>
-       <ENTRY>Path to template.docx</ENTRY>
-       <LENGTH>29</LENGTH>
-      </item>
-      <item>
-       <ID>S</ID>
-       <KEY>P_NORMAL</KEY>
-       <ENTRY>normal coma at end,</ENTRY>
-       <LENGTH>27</LENGTH>
-      </item>
-      <item>
-       <ID>S</ID>
-       <KEY>P_OTHER</KEY>
-       <ENTRY>, coma at begin of definition</ENTRY>
-       <LENGTH>37</LENGTH>
+       <ENTRY>Example document</ENTRY>
+       <LENGTH>16</LENGTH>
       </item>
      </TEXTPOOL>
     </item>

@@ -357,7 +357,7 @@ CLASS ZCL_DOCX3 IMPLEMENTATION.
   endmethod.
 
 
-  method PROTECT_SPACE.
+  METHOD protect_space.
 *--------------------------------------------------------------------*
 *  Autor: Anton.Sikidin@gmail.com
 *--------------------------------------------------------------------*
@@ -367,9 +367,19 @@ CLASS ZCL_DOCX3 IMPLEMENTATION.
           : lv_string TYPE string
           , lt_content_source TYPE TABLE OF string
           , lt_content_dest TYPE TABLE OF string
+          , lv_from_xstring92(3) TYPE x VALUE 'E29892'
+          , lv_from_xstring90(3) TYPE x VALUE 'E29890'
+          , lv_to_string92(8) TYPE x VALUE '5B4532393839325D'
+          , lv_to_string90(8) TYPE x VALUE '5B4532393839305D'
+          , lv_content TYPE xstring
           .
 
-   lv_string =  cl_abap_codepage=>convert_from( iv_content ).
+    lv_content = iv_content.
+
+    REPLACE ALL OCCURRENCES OF lv_from_xstring92 IN lv_content WITH lv_to_string92 IN BYTE MODE .
+    REPLACE ALL OCCURRENCES OF lv_from_xstring90 IN lv_content WITH lv_to_string90 IN BYTE MODE .
+
+    lv_string =  cl_abap_codepage=>convert_from( lv_content ).
 
 
 *    CALL FUNCTION 'CRM_IC_XML_XSTRING2STRING'
@@ -429,18 +439,18 @@ CLASS ZCL_DOCX3 IMPLEMENTATION.
 *        instring   = lv_string
 *      IMPORTING
 *        outxstring = rv_content.
-  endmethod.
+  ENDMETHOD.
 
 
-  method restore_space.
+  METHOD restore_space.
 *--------------------------------------------------------------------*
 *  Autor: Anton.Sikidin@gmail.com
 *--------------------------------------------------------------------*
 
-    data
-       : lv_string type string
-       , lt_string type table of string
-       , lt_data type table of text255
+    DATA
+       : lv_string TYPE string
+       , lt_string TYPE TABLE OF string
+       , lt_data TYPE TABLE OF text255
        .
 
 
@@ -455,93 +465,103 @@ CLASS ZCL_DOCX3 IMPLEMENTATION.
 
 
 
-    replace all occurrences of '[171]'  in lv_string with  '&#171;'.
-    replace all occurrences of  '[187]' in lv_string with '&#187;' .
-    replace all occurrences of  '[39]' in lv_string with '&#39;' .
+    REPLACE ALL OCCURRENCES OF '[171]'  IN lv_string WITH  '&#171;'.
+    REPLACE ALL OCCURRENCES OF  '[187]' IN lv_string WITH '&#187;' .
+    REPLACE ALL OCCURRENCES OF  '[39]' IN lv_string WITH '&#39;' .
 
-    split lv_string at '[SPACE]' into table lt_string.
+    SPLIT lv_string AT '[SPACE]' INTO TABLE lt_string.
 
-    data
-          : lv_len type i
-          , lv_buf type text255
-          , lv_pos type i
-          , lv_rem type i
-          , lv_254 type i value 254
-          , lv_255 type i value 255
+    DATA
+          : lv_len TYPE i
+          , lv_buf TYPE text255
+          , lv_pos TYPE i
+          , lv_rem TYPE i
+          , lv_254 TYPE i VALUE 254
+          , lv_255 TYPE i VALUE 255
           .
 
 
     lv_pos = 0.
     lv_rem = lv_255.
-    loop at lt_string assigning field-symbol(<lv_str>).
+    LOOP AT lt_string ASSIGNING FIELD-SYMBOL(<lv_str>).
 
       lv_len = strlen( <lv_str> ).
 
-      while lv_len > 0.
-        if lv_len > lv_rem.
+      WHILE lv_len > 0.
+        IF lv_len > lv_rem.
           lv_buf+lv_pos(lv_rem) = <lv_str>(lv_rem).
-          append lv_buf to lt_data.
+          APPEND lv_buf TO lt_data.
 
           <lv_str> = <lv_str>+lv_rem.
           lv_pos = 0.
           lv_rem = lv_255.
-          clear lv_buf.
-        else.
+          CLEAR lv_buf.
+        ELSE.
           lv_buf+lv_pos = <lv_str>.
           lv_pos = lv_pos + lv_len.
           lv_rem = lv_rem - lv_len.
-          clear <lv_str>.
+          CLEAR <lv_str>.
 
-        endif.
+        ENDIF.
         lv_len = strlen( <lv_str> ).
 
 
 
-      endwhile.
+      ENDWHILE.
 
 
 
 
-      if lv_pos < lv_254.
+      IF lv_pos < lv_254.
         lv_pos = lv_pos + 1.
         lv_rem = lv_rem - 1.
-      elseif lv_pos  = lv_254.
-        append lv_buf to lt_data.
+      ELSEIF lv_pos  = lv_254.
+        APPEND lv_buf TO lt_data.
         lv_pos = 0.
         lv_rem = lv_255.
-        clear lv_buf.
-      else.
-        append lv_buf to lt_data.
+        CLEAR lv_buf.
+      ELSE.
+        APPEND lv_buf TO lt_data.
         lv_pos = 1.
         lv_rem = lv_254.
-        clear lv_buf.
+        CLEAR lv_buf.
 
 
-      endif.
+      ENDIF.
 
 
-    endloop.
+    ENDLOOP.
 
-    append lv_buf to lt_data.
+    APPEND lv_buf TO lt_data.
 
 
-    clear lv_string.
+    CLEAR lv_string.
 
-    loop at lt_data assigning field-symbol(<lv_data>).
+    LOOP AT lt_data ASSIGNING FIELD-SYMBOL(<lv_data>).
 
-      concatenate lv_string <lv_data> into lv_string respecting blanks.
+      CONCATENATE lv_string <lv_data> INTO lv_string RESPECTING BLANKS.
 
-    endloop.
+    ENDLOOP.
 
 
     rv_content =  cl_abap_codepage=>convert_to( lv_string ).
 
+    DATA
+              : lv_from_xstring92(3) TYPE x VALUE 'E29892'
+              , lv_from_xstring90(3) TYPE x VALUE 'E29890'
+              , lv_to_string92(8) TYPE x VALUE '5B4532393839325D'
+              , lv_to_string90(8) TYPE x VALUE '5B4532393839305D'
+              .
 
+
+
+    REPLACE ALL OCCURRENCES OF lv_to_string92 IN rv_content WITH lv_from_xstring92 IN BYTE MODE .
+    REPLACE ALL OCCURRENCES OF lv_to_string90 IN rv_content WITH lv_from_xstring90 IN BYTE MODE .
 *    CALL FUNCTION 'CRM_IC_XML_STRING2XSTRING'
 *      EXPORTING
 *        instring   = lv_string
 *      IMPORTING
 *        outxstring = rv_content.
 
-  endmethod.
+  ENDMETHOD.
 ENDCLASS.
