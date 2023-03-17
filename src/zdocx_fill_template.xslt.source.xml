@@ -105,6 +105,7 @@ xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
               </xsl:choose>
             </xsl:variable>
             <xsl:element name="w:sdt">
+              <xsl:copy-of select="w:sdtPr"/>
               <xsl:apply-templates select="w:sdtContent">
                 <xsl:with-param name="text_value" select="$value"/>
                 <xsl:with-param name="use_new_value" select="string('X')"/>
