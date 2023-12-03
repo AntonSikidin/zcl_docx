@@ -7,13 +7,13 @@
     <STATE>A</STATE>
     <VARCL>X</VARCL>
     <SUBC>1</SUBC>
-    <RLOAD>8</RLOAD>
+    <RLOAD>E</RLOAD>
     <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
    <I18N_TPOOL>
     <item>
-     <LANGUAGE>8</LANGUAGE>
+     <LANGUAGE>E</LANGUAGE>
      <TEXTPOOL>
       <item>
        <ID>R</ID>
