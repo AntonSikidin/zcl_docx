@@ -3,29 +3,40 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZDOCX_EXAMPLE_CHECKBOX</NAME>
+    <NAME>ZDOCX_TEST_TEMPLATE</NAME>
     <STATE>A</STATE>
     <VARCL>X</VARCL>
     <SUBC>1</SUBC>
-    <RLOAD>E</RLOAD>
+    <RLOAD>8</RLOAD>
     <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
-   <TPOOL>
-    <item>
-     <ID>R</ID>
-     <ENTRY>Example document</ENTRY>
-     <LENGTH>16</LENGTH>
-    </item>
-   </TPOOL>
    <I18N_TPOOL>
     <item>
      <LANGUAGE>8</LANGUAGE>
      <TEXTPOOL>
       <item>
        <ID>R</ID>
-       <ENTRY>Example document</ENTRY>
-       <LENGTH>16</LENGTH>
+       <ENTRY>Прогр. ZDOCX_TEST_TEMPLATE</ENTRY>
+       <LENGTH>26</LENGTH>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>P_FILE</KEY>
+       <ENTRY>Template.docx</ENTRY>
+       <LENGTH>21</LENGTH>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>P_OBJ</KEY>
+       <ENTRY>smw0 name</ENTRY>
+       <LENGTH>17</LENGTH>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>P_TYPE</KEY>
+       <ENTRY>abap type</ENTRY>
+       <LENGTH>17</LENGTH>
       </item>
      </TEXTPOOL>
     </item>

@@ -7,82 +7,81 @@ REPORT zdocx_example.
 
 *describe types
 
-TYPES
-: begin of t_TABLE3
-,       PERSON type string
-,       SALARY type string
-, end of t_TABLE3
+TYPES:
+ begin of t_TABLE_3,
+       PERSON1 type string,
+       SALARY type string,
+ end of t_TABLE_3,
 
-, tt_TABLE3 type table of t_TABLE3 with empty key
-
-
-, begin of t_T2
-,       F1 type string
-,       F2 type string
-,       F3 type string
-, end of t_T2
-
-, tt_T2 type table of t_T2 with empty key
+ t_t_TABLE_3 type table of t_TABLE_3 with DEFAULT key,
 
 
-, begin of t_T1
-,       H1 type string
-, T2 type tt_T2
-, end of t_T1
+ begin of t_T2,
+       F1 type string,
+       F2 type string,
+       F3 type string,
+ end of t_T2,
 
-, tt_T1 type table of t_T1 with empty key
-
-
-, begin of t_LINE1
-,       FIELD1 type string
-,       FIELD2 type string
-,       FIELD3 type string
-,       FIELD4 type string
-, end of t_LINE1
-
-, tt_LINE1 type table of t_LINE1 with empty key
+ t_t_T2 type table of t_T2 with DEFAULT key,
 
 
-, begin of t_TAB1
-,       TITLE1 type string
-, LINE1 type tt_LINE1
-, end of t_TAB1
+ begin of t_T1,
+       H1 type string,
+ T2 type t_t_T2,
+ end of t_T1,
 
-, tt_TAB1 type table of t_TAB1 with empty key
-
-
-, begin of t_LINE2
-,       FIELD1 type string
-,       FIELD2 type string
-,       FIELD3 type string
-, end of t_LINE2
-
-, tt_LINE2 type table of t_LINE2 with empty key
+ t_t_T1 type table of t_T1 with DEFAULT key,
 
 
-, begin of t_TAB2
-,       TITLE2 type string
-, LINE2 type tt_LINE2
-, end of t_TAB2
+ begin of t_LINE1,
+       FIELD1 type string,
+       FIELD2 type string,
+       FIELD3 type string,
+       FIELD4 type string,
+ end of t_LINE1,
 
-, tt_TAB2 type table of t_TAB2 with empty key
-
-
-, begin of t_data
-,       SH01 type string
-,       DATE type string
-,       TIME type string
-,       USER type string
-, TABLE3 type tt_TABLE3
-, T1 type tt_T1
-, TAB1 type tt_TAB1
-, TAB2 type tt_TAB2
-, end of t_data
-
-, tt_data type table of t_data with empty key
+ t_t_LINE1 type table of t_LINE1 with DEFAULT key,
 
 
-.
+ begin of t_TAB_1,
+       TITLE1 type string,
+ LINE1 type t_t_LINE1,
+ end of t_TAB_1,
+
+ t_t_TAB_1 type table of t_TAB_1 with DEFAULT key,
+
+
+ begin of t_LINE2,
+       FIELD1 type string,
+       FIELD2 type string,
+       FIELD3 type string,
+ end of t_LINE2,
+
+ t_t_LINE2 type table of t_LINE2 with DEFAULT key,
+
+
+ begin of t_TAB_2,
+       TITLE2 type string,
+ LINE2 type t_t_LINE2,
+ end of t_TAB_2,
+
+ t_t_TAB_2 type table of t_TAB_2 with DEFAULT key,
+
+
+ begin of t_data,
+       USER type string,
+       SH01 type string,
+       DATE type string,
+       TIME type string,
+
+ TABLE_3 type t_t_TABLE_3,
+ T1 type t_t_T1,
+ TAB_1 type t_t_TAB_1,
+ TAB_2 type t_t_TAB_2,
+ end of t_data,
+
+ t_t_data type table of t_data with DEFAULT key.
+
 
 
 
@@ -107,20 +106,20 @@ gs_templ_data-USER  = sy-uname.
 *3.	Fergus Douchebag: 3000 usd
 *4.	Bartholomew Shoe: 100 usd
 
-APPEND INITIAL LINE TO gs_templ_data-table3 ASSIGNING FIELD-SYMBOL(<ls_3>).
-<ls_3>-person = 'Lurch Schpellchek'.
+APPEND INITIAL LINE TO gs_templ_data-table_3 ASSIGNING FIELD-SYMBOL(<ls_3>).
+<ls_3>-person1 = 'Lurch Schpellchek'.
 <ls_3>-salary = '1200'.
 
-APPEND INITIAL LINE TO gs_templ_data-table3 ASSIGNING <ls_3>.
-<ls_3>-person = 'Russell Sprout'.
+APPEND INITIAL LINE TO gs_templ_data-table_3 ASSIGNING <ls_3>.
+<ls_3>-person1 = 'Russell Sprout'.
 <ls_3>-salary = '1300'.
 
-APPEND INITIAL LINE TO gs_templ_data-table3 ASSIGNING <ls_3>.
-<ls_3>-person = 'Fergus Douchebag'.
+APPEND INITIAL LINE TO gs_templ_data-table_3 ASSIGNING <ls_3>.
+<ls_3>-person1 = 'Fergus Douchebag'.
 <ls_3>-salary = '3000'.
 
-APPEND INITIAL LINE TO gs_templ_data-table3 ASSIGNING <ls_3>.
-<ls_3>-person = 'Bartholomew Shoe'.
+APPEND INITIAL LINE TO gs_templ_data-table_3 ASSIGNING <ls_3>.
+<ls_3>-person1 = 'Bartholomew Shoe'.
 <ls_3>-salary = '100'.
 
 
@@ -130,7 +129,7 @@ gs_templ_data-sh01 = 'test aaa'.
 DO 3 TIMES.
   lv_index = sy-index.
 
-  APPEND INITIAL LINE TO gs_templ_data-tab1 ASSIGNING FIELD-SYMBOL(<ls_tab1>).
+  APPEND INITIAL LINE TO gs_templ_data-tab_1 ASSIGNING FIELD-SYMBOL(<ls_tab1>).
   <ls_tab1>-title1 = |table 1 subtable { lv_index }|.
 
 
@@ -157,7 +156,7 @@ ENDDO.
 DO 3 TIMES.
   lv_index = sy-index.
 
-  APPEND INITIAL LINE TO gs_templ_data-tab2 ASSIGNING FIELD-SYMBOL(<ls_tab2>).
+  APPEND INITIAL LINE TO gs_templ_data-tab_2 ASSIGNING FIELD-SYMBOL(<ls_tab2>).
   <ls_tab2>-title2 = |Table 2 subtable { lv_index }|.
 
 

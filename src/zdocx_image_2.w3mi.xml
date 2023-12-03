@@ -2,26 +2,26 @@
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_W3MI" serializer_version="v2.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
-   <NAME>ZDOCX_EXAMLE</NAME>
-   <TEXT>ZDOCX_EXAMLE</TEXT>
+   <NAME>ZDOCX_IMAGE_2</NAME>
+   <TEXT>zdocx_image_2</TEXT>
    <PARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZDOCX_EXAMLE</OBJID>
+     <OBJID>ZDOCX_IMAGE_2</OBJID>
      <NAME>fileextension</NAME>
-     <VALUE>.docx</VALUE>
+     <VALUE>.jpg</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZDOCX_EXAMLE</OBJID>
+     <OBJID>ZDOCX_IMAGE_2</OBJID>
      <NAME>filename</NAME>
-     <VALUE>ZDOCX_EXAMLE.docx</VALUE>
+     <VALUE>2.jpg</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZDOCX_EXAMLE</OBJID>
+     <OBJID>ZDOCX_IMAGE_2</OBJID>
      <NAME>mimetype</NAME>
-     <VALUE>word2</VALUE>
+     <VALUE>image/jpg</VALUE>
     </WWWPARAMS>
    </PARAMS>
   </asx:values>

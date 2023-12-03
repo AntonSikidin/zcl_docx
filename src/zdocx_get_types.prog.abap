@@ -3,67 +3,138 @@
 *&---------------------------------------------------------------------*
 *&
 *&---------------------------------------------------------------------*
-report zdocx_get_types.
+REPORT zdocx_get_types.
 
-types
-: tt_text type table of text80 with empty key
+TYPES
+: t_t_text TYPE TABLE OF text80 WITH DEFAULT KEY
 .
 
-data
-      : gv_data_model_xml type string
+DATA
+      : gv_data_model_xml TYPE string
       .
 
-parameters: p_fpath type string obligatory lower case.
+PARAMETERS: p_fpath TYPE string OBLIGATORY LOWER CASE.
 
-parameters: p_normal radiobutton group rad1 default 'X'
-          , p_other radiobutton group rad1
+PARAMETERS: p_normal RADIOBUTTON GROUP rad1 DEFAULT 'X'
+          , p_other RADIOBUTTON GROUP rad1
           .
 
-at selection-screen on value-request for p_fpath.  " Обробщик події F4
-  perform get_file_path changing p_fpath. " Вызов подпрограммы с передачей параметра f_path
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_fpath.  " Обробщик події F4
+  PERFORM get_file_path CHANGING p_fpath. " Вызов подпрограммы с передачей параметра f_path
 
-start-of-selection.
+START-OF-SELECTION.
 
-  perform get_data_model.
-  perform show_data_model.
+  PERFORM get_data_model.
+  PERFORM check_save_name.
+  PERFORM show_data_model.
 
+
+FORM check_save_name.
+*variable
+  DATA
+        : lv_regex TYPE string VALUE '<([^>/]+)/?>'
+        , lt_result_tab TYPE match_result_tab
+        , lt_names TYPE TABLE OF string
+        , lv_names TYPE string
+        , lt_bad_names TYPE TABLE OF string
+        , lv_tabname TYPE tabname
+        , lr_text       TYPE REF TO cl_demo_text
+        , lv_text TYPE char80
+        .
+*get all names
+  FIND ALL OCCURRENCES OF REGEX lv_regex IN gv_data_model_xml RESULTS lt_result_tab.
+
+
+  LOOP AT lt_result_tab ASSIGNING FIELD-SYMBOL(<fs_result>).
+    LOOP AT <fs_result>-submatches ASSIGNING FIELD-SYMBOL(<fs_submatch>).
+      lv_names = gv_data_model_xml+<fs_submatch>-offset(<fs_submatch>-length).
+      TRANSLATE lv_names TO UPPER CASE.
+      COLLECT lv_names INTO lt_names.
+    ENDLOOP.
+  ENDLOOP.
+
+  SORT lt_names.
+
+  DELETE ADJACENT DUPLICATES FROM lt_names.
+*check names
+
+  LOOP AT lt_names ASSIGNING FIELD-SYMBOL(<fs_names>).
+
+    SELECT SINGLE tabname INTO lv_tabname
+      FROM dd02l
+      WHERE tabname = <fs_names>.
+
+    IF sy-subrc = 0.
+      APPEND <fs_names> TO lt_bad_names.
+    ENDIF.
+
+  ENDLOOP.
+
+*show bad names
+  IF lt_bad_names IS NOT INITIAL.
+
+
+    lr_text = cl_demo_text=>get_handle( ).
+
+    lr_text->add_line( 'This names exist in table DD02l, thats why they cannot be used as tag names' ).
+    lr_text->add_line( '' ).
+
+
+    LOOP AT lt_bad_names ASSIGNING <fs_names>.
+      lv_text = <fs_names>.
+      lr_text->add_line( lv_text ).
+*    WRITE : / <ls_source>.
+
+    ENDLOOP.
+
+    lr_text->display( ).
+
+    MESSAGE 'Bad names in template' TYPE 'E'.
+
+  ENDIF.
+
+
+
+
+
+ENDFORM.
 
 *&---------------------------------------------------------------------*
 *&      Form  Get_file_path
 *&---------------------------------------------------------------------*
-form get_file_path changing cv_path type string.
-  clear cv_path.
+FORM get_file_path CHANGING cv_path TYPE string.
+  CLEAR cv_path.
 
-  data:
-    lv_rc          type  i,
-    lv_user_action type  i,
-    lt_file_table  type  filetable,
-    ls_file_table  like line of lt_file_table.
+  DATA:
+    lv_rc          TYPE  i,
+    lv_user_action TYPE  i,
+    lt_file_table  TYPE  filetable,
+    ls_file_table  LIKE LINE OF lt_file_table.
 
   cl_gui_frontend_services=>file_open_dialog(
-  exporting
+  EXPORTING
     window_title        = 'select template  docx'
     multiselection      = ''
     default_extension   = '*.docx'
     file_filter         = 'Text file (*.docx)|*.docx|All (*.*)|*.*'
-  changing
+  CHANGING
     file_table          = lt_file_table
     rc                  = lv_rc
     user_action         = lv_user_action
-  exceptions
-    others              = 1
+  EXCEPTIONS
+    OTHERS              = 1
     ).
-  if sy-subrc = 0.
-    if lv_user_action = cl_gui_frontend_services=>action_ok.
-      if lt_file_table is not initial.
-        read table lt_file_table into ls_file_table index 1.
-        if sy-subrc = 0.
+  IF sy-subrc = 0.
+    IF lv_user_action = cl_gui_frontend_services=>action_ok.
+      IF lt_file_table IS NOT INITIAL.
+        READ TABLE lt_file_table INTO ls_file_table INDEX 1.
+        IF sy-subrc = 0.
           cv_path = ls_file_table-filename.
-        endif.
-      endif.
-    endif.
-  endif.
-endform.                    " Get_file_path
+        ENDIF.
+      ENDIF.
+    ENDIF.
+  ENDIF.
+ENDFORM.                    " Get_file_path
 *&---------------------------------------------------------------------*
 *&      Form  GET_DATA_MODEL
 *&---------------------------------------------------------------------*
@@ -72,19 +143,23 @@ endform.                    " Get_file_path
 *  -->  p1        text
 *  <--  p2        text
 *----------------------------------------------------------------------*
-form get_data_model .
+FORM get_data_model .
 
 
-  data(lt_file_data) = value solix_tab( ).
+
+  DATA
+        : lt_file_data TYPE solix_tab
+        , lv_filelength TYPE i
+        .
   cl_gui_frontend_services=>gui_upload(
-    exporting
+    EXPORTING
       filename                = p_fpath          " Name of file
       filetype                = 'BIN'                 " File Type (ASCII, Binary)
-    importing
-      filelength              = data(lv_filelength)   " File Length
-    changing
+    IMPORTING
+      filelength              = lv_filelength   " File Length
+    CHANGING
       data_tab                = lt_file_data          " Transfer table for file contents
-    exceptions
+    EXCEPTIONS
       file_open_error         = 1                " File does not exist and cannot be opened
       file_read_error         = 2                " Error when reading file
       no_batch                = 3                " Cannot execute front-end function in background
@@ -103,59 +178,59 @@ form get_data_model .
       dp_timeout              = 16               " Data provider timeout
       not_supported_by_gui    = 17               " GUI does not support this
       error_no_gui            = 18               " GUI not available
-      others                  = 19 ).
+      OTHERS                  = 19 ).
 
 
 
-  data
-        : lv_bin_content type xstring
+  DATA
+        : lv_bin_content TYPE xstring
         .
 
   lv_bin_content = cl_bcs_convert=>solix_to_xstring(
-     exporting
+
        it_solix = lt_file_data               " Input data
        iv_size  = lv_filelength ).
 
 
-  data
-        : lo_zip type ref to cl_abap_zip
+  DATA
+        : lo_zip TYPE REF TO cl_abap_zip
         .
 
-  create object lo_zip.
+  CREATE OBJECT lo_zip.
 
   lo_zip->load( lv_bin_content ).
 
-  data
-        : lv_content type xstring
+  DATA
+        : lv_content TYPE xstring
         .
 
-  lo_zip->get( exporting  name =  'word/document.xml'
-                importing content = lv_content ).
+  lo_zip->get( EXPORTING  name =  'word/document.xml'
+                IMPORTING content = lv_content ).
 
-  data
-        : lv_data_model_xml type string
+  DATA
+        : lv_data_model_xml TYPE string
         .
 
-  call transformation zdocx_data_model
-  source xml lv_content
-  result xml gv_data_model_xml.
+  CALL TRANSFORMATION zdocx_data_model
+  SOURCE XML lv_content
+  RESULT XML gv_data_model_xml.
 
 
-endform.
+ENDFORM.
 
 
-form show_data_model.
+FORM show_data_model.
 
 
-  data
-        : ro_ixml type ref to if_ixml_document
+  DATA
+        : lo_ixml_document TYPE REF TO if_ixml_document
         .
 
-  data: lv_content       type xstring,
-        lo_ixml          type ref to if_ixml,
-        lo_streamfactory type ref to if_ixml_stream_factory,
-        lo_istream       type ref to if_ixml_istream,
-        lo_parser        type ref to if_ixml_parser.
+  DATA: lv_content       TYPE xstring,
+        lo_ixml          TYPE REF TO if_ixml,
+        lo_streamfactory TYPE REF TO if_ixml_stream_factory,
+        lo_istream       TYPE REF TO if_ixml_istream,
+        lo_parser        TYPE REF TO if_ixml_parser.
 
 *--------------------------------------------------------------------*
 * Load XML file from archive into an input stream,
@@ -165,159 +240,179 @@ form show_data_model.
   lo_ixml           = cl_ixml=>create( ).
   lo_streamfactory  = lo_ixml->create_stream_factory( ).
   lo_istream        = lo_streamfactory->create_istream_string( gv_data_model_xml ).
-  ro_ixml            = lo_ixml->create_document( ).
+  lo_ixml_document            = lo_ixml->create_document( ).
   lo_parser         = lo_ixml->create_parser( stream_factory = lo_streamfactory
                                               istream        = lo_istream
-                                              document       = ro_ixml ).
+                                              document       = lo_ixml_document ).
 *    lo_parser->set_normalizing( 'X' ).
   lo_parser->set_validating( mode = if_ixml_parser=>co_no_validation ).
   lo_parser->parse( ).
 
 
-  data
-        : lt_source type tt_text
-        , lr_node type ref to if_ixml_node
-        , nodes type ref to if_ixml_node_list
+  DATA
+        : lt_source TYPE t_t_text
+        , lr_node TYPE REF TO if_ixml_node
+        , lr_nodes TYPE REF TO if_ixml_node_list
         .
 
-  lr_node = ro_ixml.
-  nodes = lr_node->get_children( ).
-  lr_node = nodes->get_item( 0 ).
+  lr_node = lo_ixml_document.
+  lr_nodes = lr_node->get_children( ).
+  lr_node = lr_nodes->get_item( 0 ).
 
-  perform parse_tree using lr_node  'data' changing lt_source.
+  PERFORM parse_tree USING lr_node  'data' 'X' CHANGING lt_source.
+
+  FIELD-SYMBOLS
+                 : <ls_source> TYPE text80
+                 .
 
 
-
-  if p_normal is not initial.
-    insert initial line into lt_source assigning field-symbol(<ls_source>) index 1.
+  IF p_normal IS NOT INITIAL.
+    INSERT INITIAL LINE INTO lt_source ASSIGNING <ls_source> INDEX 1.
     <ls_source> = 'TYPES:'.
 
-    data
-          : lv_lines type i
+    DATA
+          : lv_lines TYPE i
           .
 
     lv_lines = lines( lt_source ) - 2.
 
-    read table lt_source assigning <ls_source> index lv_lines.
-    replace all occurrences of ',' in <ls_source> with '.'.
+    READ TABLE lt_source ASSIGNING <ls_source> INDEX lv_lines.
+    REPLACE ALL OCCURRENCES OF ',' IN <ls_source> WITH '.'.
 
 
-  else.
-    append initial line to lt_source assigning <ls_source>.
+  ELSE.
+    APPEND INITIAL LINE TO lt_source ASSIGNING <ls_source>.
     <ls_source> = '.'.
-    read table lt_source assigning <ls_source> index 1.
-    replace all occurrences of ',' in <ls_source> with ':'.
-    insert initial line into lt_source assigning <ls_source> index 1.
+    READ TABLE lt_source ASSIGNING <ls_source> INDEX 1.
+    REPLACE ALL OCCURRENCES OF ',' IN <ls_source> WITH ':'.
+    INSERT INITIAL LINE INTO lt_source ASSIGNING <ls_source> INDEX 1.
     <ls_source> = 'TYPES'.
-  endif.
+  ENDIF.
+
+  DATA
+        : lr_text       TYPE REF TO cl_demo_text
+        .
+
+  lr_text = cl_demo_text=>get_handle( ).
+
+
+  LOOP AT lt_source ASSIGNING <ls_source>.
+    lr_text->add_line( <ls_source> ).
+*    WRITE : / <ls_source>.
+
+  ENDLOOP.
+
+  lr_text->display( ).
 
 
 
 
+ENDFORM.
 
-  cl_demo_output=>new( 'TEXT'
-    )->display( lt_source ).
-endform.
+FORM parse_tree USING p_r_node TYPE REF TO if_ixml_node  p_name p_add_flag TYPE string CHANGING ct_source TYPE t_t_text.
 
-form parse_tree using ir_node type ref to if_ixml_node  name type string changing source type tt_text.
-
-
-  data
-         : lv_node_name type string
-         , lv_flag_no_add type c
+*data
+  DATA
+         : lv_node_name TYPE string
+         , lv_flag_no_add TYPE c
          .
 
 
-  data: nodes       type ref to if_ixml_node_list,
-        child       type ref to if_ixml_node,
-        index       type i,
-        child_count type i.
+  DATA: lr_nodes       TYPE REF TO if_ixml_node_list,
+        lr_child       TYPE REF TO if_ixml_node,
+        lv_index       TYPE i,
+        lv_child_count TYPE i.
 
 
-  lv_node_name = ir_node->get_name( ).
+  lv_node_name = p_r_node->get_name( ).
 
-  nodes = ir_node->get_children( ).
-  data
-        : tmp_source type tt_text
+  lr_nodes = p_r_node->get_children( ).
+  DATA
+        : lt_tmp_source TYPE t_t_text
         .
-  append initial line to tmp_source assigning field-symbol(<fs_source>).
 
-  if p_normal is not initial.
-    <fs_source> = | begin of t_{ name },|.
-  else.
-    <fs_source> = |, begin of t_{ name }|.
-  endif.
+*добавляємо аочато опису типу
+  FIELD-SYMBOLS
+                 : <fs_source> TYPE text80
+                 .
+  APPEND INITIAL LINE TO lt_tmp_source ASSIGNING <fs_source>.
 
+  IF p_normal IS NOT INITIAL.
+    <fs_source> = | begin of t_{ p_name },|.
+  ELSE.
+    <fs_source> = |, begin of t_{ p_name }|.
+  ENDIF.
 
+*обробляємо поля
 
-  while index < nodes->get_length( ).
+  WHILE lv_index < lr_nodes->get_length( ).
 
-    child = nodes->get_item( index ).
+    lr_child = lr_nodes->get_item( lv_index ).
 
-    lv_node_name = child->get_name( ).
+    lv_node_name = lr_child->get_name( ).
 
-    translate lv_node_name to upper case.
+    TRANSLATE lv_node_name TO UPPER CASE.
 
-    if lv_node_name = 'ITEM' .
+    IF lv_node_name = 'ITEM' .
       lv_flag_no_add = 'X'.
 
-      perform parse_tree using child  name changing source.
+      PERFORM parse_tree USING lr_child  p_name ''  CHANGING ct_source.
 
-    else.
+    ELSE.
 
-      data
-            : child_of_child type ref to if_ixml_node_list
+      DATA
+            : lr_child_of_child TYPE REF TO if_ixml_node_list
             .
 
-      child_of_child = child->get_children( ).
-      child_count = child_of_child->get_length( ).
+      lr_child_of_child = lr_child->get_children( ).
+      lv_child_count = lr_child_of_child->get_length( ).
 
-      append initial line to tmp_source assigning <fs_source>.
-      if child_count = 0.
+      APPEND INITIAL LINE TO lt_tmp_source ASSIGNING <fs_source>.
+      IF lv_child_count = 0.
 
-        if p_normal is not initial.
+        IF p_normal IS NOT INITIAL.
           <fs_source> = |       { lv_node_name } type string,|.
-        else.
+        ELSE.
           <fs_source> = |,       { lv_node_name } type string |.
-        endif.
-      else.
-        if p_normal is not initial.
-          <fs_source> = | { lv_node_name } type tt_{ lv_node_name }, |.
-        else.
-          <fs_source> = |, { lv_node_name } type tt_{ lv_node_name } |.
-        endif.
+        ENDIF.
+      ELSE.
+        IF p_normal IS NOT INITIAL.
+          <fs_source> = | { lv_node_name } type t_t_{ lv_node_name }, |.
+        ELSE.
+          <fs_source> = |, { lv_node_name } type t_t_{ lv_node_name } |.
+        ENDIF.
 
-        perform parse_tree using child  lv_node_name changing source.
-      endif.
+        PERFORM parse_tree USING lr_child  lv_node_name '' CHANGING ct_source.
+      ENDIF.
 
-    endif.
+    ENDIF.
 
-    index = index + 1.
+    lv_index = lv_index + 1.
 
-  endwhile.
+  ENDWHILE.
+
+*кінець опису типу
+  APPEND INITIAL LINE TO lt_tmp_source ASSIGNING <fs_source>.
+  IF p_normal IS NOT INITIAL.
+    <fs_source> = | end of t_{ p_name },|.
+  ELSE.
+    <fs_source> = |, end of t_{ p_name }|.
+  ENDIF.
+
+  APPEND INITIAL LINE TO lt_tmp_source ASSIGNING <fs_source>.
+  APPEND INITIAL LINE TO lt_tmp_source ASSIGNING <fs_source>.
+  IF p_normal IS NOT INITIAL.
+    <fs_source> = | t_t_{ p_name } type table of t_{ p_name } with DEFAULT key,|.
+  ELSE.
+    <fs_source> = |, t_t_{ p_name } type table of t_{ p_name } with DEFAULT key|.
+  ENDIF.
+
+  APPEND INITIAL LINE TO lt_tmp_source ASSIGNING <fs_source>.
+  APPEND INITIAL LINE TO lt_tmp_source ASSIGNING <fs_source>.
 
 
-  append initial line to tmp_source assigning <fs_source>.
-  if p_normal is not initial.
-    <fs_source> = | end of t_{ name },|.
-  else.
-    <fs_source> = |, end of t_{ name }|.
-  endif.
+  IF lv_flag_no_add IS INITIAL OR p_add_flag IS NOT INITIAL.
+    APPEND LINES OF lt_tmp_source TO ct_source.
+  ENDIF.
 
-  append initial line to tmp_source assigning <fs_source>.
-  append initial line to tmp_source assigning <fs_source>.
-  if p_normal is not initial.
-    <fs_source> = | tt_{ name } type table of t_{ name } with empty key,|.
-  else.
-    <fs_source> = |, tt_{ name } type table of t_{ name } with empty key|.
-  endif.
-
-  append initial line to tmp_source assigning <fs_source>.
-  append initial line to tmp_source assigning <fs_source>.
-
-
-  if lv_flag_no_add is initial.
-    append lines of tmp_source to source.
-  endif.
-
-endform.
+ENDFORM.

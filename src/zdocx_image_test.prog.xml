@@ -3,29 +3,22 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZDOCX_EXAMPLE_CHECKBOX</NAME>
+    <NAME>ZDOCX_IMAGE_TEST</NAME>
     <STATE>A</STATE>
     <VARCL>X</VARCL>
     <SUBC>1</SUBC>
-    <RLOAD>E</RLOAD>
+    <RLOAD>8</RLOAD>
     <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
-   <TPOOL>
-    <item>
-     <ID>R</ID>
-     <ENTRY>Example document</ENTRY>
-     <LENGTH>16</LENGTH>
-    </item>
-   </TPOOL>
    <I18N_TPOOL>
     <item>
      <LANGUAGE>8</LANGUAGE>
      <TEXTPOOL>
       <item>
        <ID>R</ID>
-       <ENTRY>Example document</ENTRY>
-       <LENGTH>16</LENGTH>
+       <ENTRY>test image</ENTRY>
+       <LENGTH>10</LENGTH>
       </item>
      </TEXTPOOL>
     </item>

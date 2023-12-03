@@ -7,36 +7,36 @@ REPORT zdocx_example_checkbox.
 
 *describe types #asd
 
-TYPES
-: BEGIN OF t_table1
-,       row_disappear TYPE string
-,       row_disappear1 TYPE string
-,       row_disappear2 TYPE string
-,       row_disappear3 TYPE string
-, END OF t_table1
+TYPES:
+ begin of t_TABLE_1,
+       ROW_DISAPPEAR type string,
+       ROW_DISAPPEAR1 type string,
+       ROW_DISAPPEAR2 type string,
+       ROW_DISAPPEAR3 type string,
+ end of t_TABLE_1,
 
-, tt_table1 TYPE TABLE OF t_table1 WITH EMPTY KEY
-
-
-, BEGIN OF t_table2
-,       chk3 TYPE string
-,       text3 TYPE string
-, END OF t_table2
-
-, tt_table2 TYPE TABLE OF t_table2 WITH EMPTY KEY
+ t_t_TABLE_1 type table of t_TABLE_1 with empty key,
 
 
-, BEGIN OF t_data
-,       checked TYPE string
-,       unchecked TYPE string
-, table1 TYPE tt_table1
-, table2 TYPE tt_table2
-, END OF t_data
+ begin of t_TABLE_2,
+       CHK3 type string,
+       TEXT3 type string,
+ end of t_TABLE_2,
 
-, tt_data TYPE TABLE OF t_data WITH EMPTY KEY
+ t_t_TABLE_2 type table of t_TABLE_2 with empty key,
 
 
-.
+
+
+ begin of t_data,
+       CHECKED type string,
+       UNCHECKED type string,
+ TABLE_1 type t_t_TABLE_1,
+ TABLE_2 type t_t_TABLE_2,
+ end of t_data,
+
+ t_t_data type table of t_data with empty key.
+
 
 
 
@@ -47,19 +47,19 @@ DATA
 gs_templ_data-checked = 'Y'.
 gs_templ_data-unchecked = ''.
 
-APPEND INITIAL LINE TO gs_templ_data-table2 ASSIGNING field-symbol(<fs_2>).
+APPEND INITIAL LINE TO gs_templ_data-table_2 ASSIGNING field-symbol(<fs_2>).
 <fs_2>-chk3 = 'X'.
 <fs_2>-text3 = 'row1'.
 
-APPEND INITIAL LINE TO gs_templ_data-table2 ASSIGNING <fs_2>.
+APPEND INITIAL LINE TO gs_templ_data-table_2 ASSIGNING <fs_2>.
 <fs_2>-chk3 = ''.
 <fs_2>-text3 = 'row2'.
 
-APPEND INITIAL LINE TO gs_templ_data-table2 ASSIGNING <fs_2>.
+APPEND INITIAL LINE TO gs_templ_data-table_2 ASSIGNING <fs_2>.
 <fs_2>-chk3 = 'x'.
 <fs_2>-text3 = 'row3'.
 
-APPEND INITIAL LINE TO gs_templ_data-table2 ASSIGNING <fs_2>.
+APPEND INITIAL LINE TO gs_templ_data-table_2 ASSIGNING <fs_2>.
 <fs_2>-chk3 = ''.
 <fs_2>-text3 = 'row4'.
 
