@@ -1,6 +1,5 @@
-<?xml version="1.0"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml"
-xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:w14=
+"http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" version="1.0">
   <xsl:param name="DATA"/>
   <!-- convert -->
   <xsl:variable name="data_nodeset">
@@ -16,14 +15,72 @@ xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
     <xsl:param name="text_value" select="string('')"/>
     <xsl:param name="prev_data_nodeset"/>
     <xsl:param name="use_new_value" select="string('')"/>
+    <xsl:param name="cx_emus" select="string('')"/>
+    <xsl:param name="cy_emus" select="string('')"/>
+    <xsl:param name="use_size" select="string('')"/>
     <xsl:copy>
       <xsl:apply-templates select="@* | node()">
         <xsl:with-param name="text_value" select="$text_value"/>
         <xsl:with-param name="prev_data_nodeset" select="$prev_data_nodeset"/>
         <xsl:with-param name="use_new_value" select="$use_new_value"/>
+        <xsl:with-param name="cx_emus" select="$cx_emus"/>
+        <xsl:with-param name="cy_emus" select="$cy_emus"/>
+        <xsl:with-param name="use_size" select="$use_size"/>
       </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
+
+  <!--  img -->
+  <xsl:template match="@r:embed">
+    <xsl:param name="text_value" select="string('')"/>
+    <xsl:param name="use_new_value" select="string('')"/>
+    <xsl:attribute name="r:embed">
+
+      <xsl:choose>
+        <xsl:when test="$use_new_value != ''">
+          <xsl:value-of select="$text_value"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="."/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:attribute>
+  </xsl:template>
+
+  <!--  img size cx-->
+  <xsl:template match="@cx">
+    <xsl:param name="cx_emus" select="string('')"/>
+    <xsl:param name="use_size" select="string('')"/>
+    <xsl:attribute name="cx">
+
+      <xsl:choose>
+        <xsl:when test="$use_size != ''">
+          <xsl:value-of select="$cx_emus"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="."/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:attribute>
+  </xsl:template>
+
+  <!--  img size cy-->
+  <xsl:template match="@cy">
+    <xsl:param name="cy_emus" select="string('')"/>
+    <xsl:param name="use_size" select="string('')"/>
+    <xsl:attribute name="cy">
+
+      <xsl:choose>
+        <xsl:when test="$use_size != ''">
+          <xsl:value-of select="$cy_emus"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="."/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:attribute>
+  </xsl:template>
+
   <!--  запролняем переменную-->
   <xsl:template match="w:t">
     <xsl:param name="text_value" select="string('')"/>
@@ -43,7 +100,11 @@ xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
   <!-- нашли ноду -->
   <xsl:template match="w:sdt">
     <xsl:param name="text_value" select="string('')"/>
+    <xsl:param name="use_new_value" select="string('')"/>
     <xsl:param name="prev_data_nodeset"/>
+    <xsl:param name="cx_emus" select="string('')"/>
+    <xsl:param name="cy_emus" select="string('')"/>
+    <xsl:param name="use_size" select="string('')"/>
     <!-- есть ли у нее tag -->
     <xsl:variable name="is_tag">
       <xsl:value-of select="count(w:sdtPr/w:tag)"/>
@@ -52,6 +113,11 @@ xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
     <xsl:variable name="is_check_box">
       <xsl:value-of select="count(w:sdtPr/w14:checkbox)"/>
     </xsl:variable>
+    <!-- is_image? -->
+    <xsl:variable name="is_image">
+      <xsl:value-of select="count(w:sdtPr/w:picture)"/>
+    </xsl:variable>
+
     <xsl:choose>
       <!-- tag есть -->
       <xsl:when test="$is_tag = 1">
@@ -81,13 +147,23 @@ xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
             <xsl:variable name="tmp_value">
               <xsl:value-of select="$curr_data_nodeset/*[name() = $tag_name]"/>
             </xsl:variable>
+            <xsl:variable name="tmp_img" select="$curr_data_nodeset/*[name() = $tag_name]"> </xsl:variable>
             <!--  переменная  -->
             <xsl:variable name="value">
               <xsl:choose>
                 <xsl:when test="$is_check_box = 0">
                   <!--  не чекбокс  -->
-                  <xsl:value-of select="$tmp_value"/>
-                  <!--  копируем переменную  -->
+                  <xsl:choose>
+                    <xsl:when test="$is_image = 0">
+                      <!--  не image  -->
+                      <xsl:value-of select="$tmp_value"/>
+                      <!--  копируем переменную  -->
+                    </xsl:when>
+                    <!--  тут картинка  -->
+                    <xsl:otherwise>
+                      <xsl:value-of select="$tmp_img/*[name() = 'NAME']"/>
+                    </xsl:otherwise>
+                  </xsl:choose>
                 </xsl:when>
                 <xsl:otherwise>
                   <!--  тут чекбокс  -->
@@ -104,11 +180,64 @@ xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:variable>
+
+            <xsl:variable name="new_size">
+              <xsl:choose>
+                <xsl:when test="$is_image = 0">
+                  <xsl:value-of select=""/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="$tmp_img/*[name() = 'USE_SIZE']"/>
+                </xsl:otherwise>
+              </xsl:choose>
+
+            </xsl:variable>
+
+            <xsl:variable name="cx">
+              <xsl:choose>
+                <xsl:when test="$new_size != ''">
+                  <xsl:value-of select="$tmp_img/*[name() = 'CX_EMUS']"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select=""/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:variable>
+
+            <xsl:variable name="cy">
+              <xsl:choose>
+                <xsl:when test="$new_size != ''">
+                  <xsl:value-of select="$tmp_img/*[name() = 'CY_EMUS']"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select=""/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:variable>
+
+            <!--  debug
+
+            <xsl:choose>
+              <xsl:when test="$new_size != ''">
+                <xsl:value-of select="1"/>
+                <xsl:value-of select="$cx"/>
+                <xsl:value-of select="2"/>
+                <xsl:value-of select="$cy"/>
+                <xsl:value-of select="3"/>
+              </xsl:when>
+            </xsl:choose>
+
+            -->
+
+
             <xsl:element name="w:sdt">
               <xsl:copy-of select="w:sdtPr"/>
               <xsl:apply-templates select="w:sdtContent">
                 <xsl:with-param name="text_value" select="$value"/>
                 <xsl:with-param name="use_new_value" select="string('X')"/>
+                <xsl:with-param name="cx_emus" select="$cx"/>
+                <xsl:with-param name="cy_emus" select="$cy"/>
+                <xsl:with-param name="use_size" select="$new_size"/>
               </xsl:apply-templates>
             </xsl:element>
           </xsl:when>
@@ -168,6 +297,10 @@ xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" version="1.0">
           <xsl:apply-templates select="@* | node()">
             <xsl:with-param name="text_value" select="$text_value"/>
             <xsl:with-param name="prev_data_nodeset" select="$prev_data_nodeset"/>
+            <xsl:with-param name="use_new_value" select="$use_new_value"/>
+            <xsl:with-param name="cx_emus" select="$cx_emus"/>
+            <xsl:with-param name="cy_emus" select="$cy_emus"/>
+            <xsl:with-param name="use_size" select="$use_size"/>
           </xsl:apply-templates>
         </xsl:copy>
       </xsl:otherwise>

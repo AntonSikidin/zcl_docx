@@ -27,6 +27,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Zip Utility</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_DOCX3</CLSNAME>
+     <CMPNAME>MO_ZIP</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Zip Utility</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
