@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
     <CLSNAME>ZCL_DOCX3</CLSNAME>
-    <VERSION>1</VERSION>
     <LANGU>E</LANGU>
     <DESCRIPT>Best way to create Microsoft Word docx from ABAP</DESCRIPT>
     <STATE>1</STATE>
@@ -14,31 +13,16 @@
    </VSEOCLASS>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DOCX3</CLSNAME>
      <CMPNAME>MC_DOCUMENT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>&apos;word/document.xml&apos;</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DOCX3</CLSNAME>
-     <CMPNAME>MC_DOCUMENT</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>&apos;word/document.xml&apos;</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_DOCX3</CLSNAME>
      <CMPNAME>MO_TEMPL_DATA_NC</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Collection of Nodes of a DOM</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_DOCX3</CLSNAME>
-     <CMPNAME>MO_TEMPL_DATA_NC</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Collection of Nodes of a DOM</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_DOCX3</CLSNAME>
      <CMPNAME>MO_ZIP</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Zip Utility</DESCRIPT>
